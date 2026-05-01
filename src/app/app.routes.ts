@@ -173,3 +173,4 @@ export const routes: Routes = [
   // Wildcard: redirigir rutas no encontradas al inicio
   { path: '**', redirectTo: '' },
 ];
+
