@@ -36,3 +36,4 @@ export class App {
       && !url.startsWith('/recuperar-contrasena');
   });
 }
+
