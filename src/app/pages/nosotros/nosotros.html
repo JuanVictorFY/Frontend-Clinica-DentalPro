@@ -56,14 +56,14 @@
       <div class="h-1.5 w-24 bg-blue-600 mx-auto mt-6 rounded-full"></div>
     </div>
 
-    <div class="flex justify-end mb-4">
-      <span class="text-sm font-bold text-blue-500 animate-pulse flex items-center gap-2">
-        Conoce al equipo <span aria-hidden="true" class="text-lg">&rarr;</span>
+    <div class="flex justify-end mb-4 select-none">
+      <span (click)="manualScroll()" class="text-sm font-bold text-blue-500 animate-pulse flex items-center gap-2 cursor-pointer hover:text-blue-700 transition-colors">
+        Siguiente especialista <span aria-hidden="true" class="text-lg">&rarr;</span>
       </span>
     </div>
 
     <!-- Contenedor Carrusel de Doctores -->
-    <div class="flex overflow-x-auto gap-6 md:gap-8 pb-12 pt-4 snap-x snap-mandatory scroll-smooth [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+    <div #carousel (mouseenter)="stopAutoScroll()" (mouseleave)="startAutoScroll()" class="flex overflow-x-auto gap-6 md:gap-8 pb-12 pt-4 snap-x snap-mandatory scroll-smooth [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
 
       <!-- Doctor 1 -->
       <div class="shrink-0 w-[85vw] md:w-[320px] snap-center group bg-linear-to-br from-white to-blue-50/50 p-6 rounded-4xl border-2 border-transparent hover:border-blue-200 shadow-lg hover:shadow-2xl hover:shadow-blue-500/20 hover:-translate-y-4 hover:scale-[1.02] transition-all duration-500 ease-out cursor-pointer text-center">
@@ -87,6 +87,22 @@
         <h3 class="text-xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors">Dr. Carlos Ruiz</h3>
         <p class="text-blue-500 font-medium text-sm mt-1 mb-4 uppercase tracking-wider">Odontopediatra</p>
         <p class="text-gray-500 text-sm leading-relaxed">Dedicado al cuidado y prevención dental infantil en un ambiente seguro.</p>
+      </div>
+
+      <!-- Doctor 4 -->
+      <div class="shrink-0 w-[85vw] md:w-[320px] snap-center group bg-linear-to-br from-white to-blue-50/50 p-6 rounded-4xl border-2 border-transparent hover:border-blue-200 shadow-lg hover:shadow-2xl hover:shadow-blue-500/20 hover:-translate-y-4 hover:scale-[1.02] transition-all duration-500 ease-out cursor-pointer text-center">
+        <img src="https://images.unsplash.com/photo-1559839734-2b71ea197ec2?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=400&q=80" alt="Dra. Sofía Médica" class="w-32 h-32 mx-auto rounded-full object-cover shadow-md mb-6 border-4 border-white group-hover:scale-110 transition-transform duration-500">
+        <h3 class="text-xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors">Dra. Sofía Castro</h3>
+        <p class="text-blue-500 font-medium text-sm mt-1 mb-4 uppercase tracking-wider">Endodoncista</p>
+        <p class="text-gray-500 text-sm leading-relaxed">Experta en tratamientos de conducto y preservación de piezas dentales naturales.</p>
+      </div>
+
+      <!-- Doctor 5 -->
+      <div class="shrink-0 w-[85vw] md:w-[320px] snap-center group bg-linear-to-br from-white to-blue-50/50 p-6 rounded-4xl border-2 border-transparent hover:border-blue-200 shadow-lg hover:shadow-2xl hover:shadow-blue-500/20 hover:-translate-y-4 hover:scale-[1.02] transition-all duration-500 ease-out cursor-pointer text-center">
+        <img src="https://images.unsplash.com/photo-1622902046580-2b47f47f5471?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=400&q=80" alt="Dr. Luis Médico" class="w-32 h-32 mx-auto rounded-full object-cover shadow-md mb-6 border-4 border-white group-hover:scale-110 transition-transform duration-500">
+        <h3 class="text-xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors">Dr. Luis Mendoza</h3>
+        <p class="text-blue-500 font-medium text-sm mt-1 mb-4 uppercase tracking-wider">Cirujano Dentista</p>
+        <p class="text-gray-500 text-sm leading-relaxed">Especialista en extracciones complejas y manejo del dolor en cirugía oral.</p>
       </div>
     </div>
   </div>
