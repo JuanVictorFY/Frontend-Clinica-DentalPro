@@ -1,0 +1,14 @@
+<div class="min-h-screen bg-white font-sans text-gray-900">
+  <!-- Componente de la barra de navegación (Navbar) -->
+  <app-navbar></app-navbar>
+
+  <!-- Contenedor principal del contenido de la página.
+       El padding superior (pt-24) evita que el contenido quede oculto bajo la Navbar fija. -->
+  <div class="pt-24">
+    <!-- Aquí se renderizarán los componentes de las rutas (páginas) -->
+    <router-outlet></router-outlet>
+  </div>
+
+  <!-- Componente del pie de página (Footer) -->
+  <app-footer></app-footer>
+</div>
