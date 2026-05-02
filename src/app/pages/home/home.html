@@ -41,14 +41,14 @@
       <div class="h-1.5 w-24 bg-blue-600 mx-auto mt-6 rounded-full"></div>
     </div>
 
-    <div class="flex justify-end mb-4">
-      <span class="text-sm font-bold text-blue-500 animate-pulse flex items-center gap-2">
+    <div class="flex justify-end mb-4 select-none">
+      <span (click)="manualScroll()" class="text-sm font-bold text-blue-500 animate-pulse flex items-center gap-2 cursor-pointer hover:text-blue-700 transition-colors">
         Desliza para explorar <span aria-hidden="true" class="text-lg">&rarr;</span>
       </span>
     </div>
 
     <!-- Contenedor Carrusel -->
-    <div class="flex overflow-x-auto gap-6 md:gap-8 pb-12 pt-4 snap-x snap-mandatory scroll-smooth [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+    <div #carousel (mouseenter)="stopAutoScroll()" (mouseleave)="startAutoScroll()" class="flex overflow-x-auto gap-6 md:gap-8 pb-12 pt-4 snap-x snap-mandatory scroll-smooth [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
       <!-- Tarjeta de servicio: Ortodoncia Invisible -->
       <div class="shrink-0 w-[85vw] md:w-95 snap-center group bg-linear-to-br from-white to-blue-50/80 p-8 rounded-4xl border-2 border-transparent hover:border-blue-200 shadow-xl hover:shadow-2xl hover:shadow-blue-500/20 hover:-translate-y-4 hover:scale-[1.02] transition-all duration-500 ease-out cursor-pointer">
         <div class="text-blue-600 mb-6 text-5xl group-hover:scale-110 group-hover:-rotate-6 transition-transform duration-500 origin-bottom-left" role="img" aria-label="Diente">🦷</div>
@@ -76,6 +76,20 @@
         <div class="text-blue-600 mb-6 text-5xl group-hover:scale-110 group-hover:-rotate-6 transition-transform duration-500 origin-bottom-left" role="img" aria-label="Oso">🧸</div>
         <h3 class="text-2xl font-bold text-gray-800 mb-3 group-hover:text-blue-600 transition-colors">Odontopediatría</h3>
         <p class="text-gray-500 text-sm leading-relaxed">Cuidado dental especializado para los más pequeños en un ambiente amigable y sin miedos.</p>
+      </div>
+
+      <!-- Tarjeta extra para carrusel: Endodoncia -->
+      <div class="shrink-0 w-[85vw] md:w-95 snap-center group bg-linear-to-br from-white to-blue-50/80 p-8 rounded-4xl border-2 border-transparent hover:border-blue-200 shadow-xl hover:shadow-2xl hover:shadow-blue-500/20 hover:-translate-y-4 hover:scale-[1.02] transition-all duration-500 ease-out cursor-pointer">
+        <div class="text-blue-600 mb-6 text-5xl group-hover:scale-110 group-hover:-rotate-6 transition-transform duration-500 origin-bottom-left" role="img" aria-label="Rayo">⚡</div>
+        <h3 class="text-2xl font-bold text-gray-800 mb-3 group-hover:text-blue-600 transition-colors">Endodoncia Avanzada</h3>
+        <p class="text-gray-500 text-sm leading-relaxed">Tratamientos de conducto indoloros para salvar tus piezas dentales naturales.</p>
+      </div>
+
+      <!-- Tarjeta extra para carrusel: Cirugía -->
+      <div class="shrink-0 w-[85vw] md:w-95 snap-center group bg-linear-to-br from-white to-blue-50/80 p-8 rounded-4xl border-2 border-transparent hover:border-blue-200 shadow-xl hover:shadow-2xl hover:shadow-blue-500/20 hover:-translate-y-4 hover:scale-[1.02] transition-all duration-500 ease-out cursor-pointer">
+        <div class="text-blue-600 mb-6 text-5xl group-hover:scale-110 group-hover:-rotate-6 transition-transform duration-500 origin-bottom-left" role="img" aria-label="Salud">🏥</div>
+        <h3 class="text-2xl font-bold text-gray-800 mb-3 group-hover:text-blue-600 transition-colors">Cirugía Maxilofacial</h3>
+        <p class="text-gray-500 text-sm leading-relaxed">Procedimientos quirúrgicos de alta precisión con recuperación acelerada.</p>
       </div>
     </div>
   </div>
