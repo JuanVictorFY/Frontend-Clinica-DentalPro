@@ -1,25 +1,28 @@
 <!-- Sección principal de bienvenida (Hero Section) -->
-<section class="pt-10 pb-20 text-center">
-  <div class="max-w-4xl mx-auto px-4">
+<section class="relative pt-24 pb-32 text-center bg-gray-900 bg-cover bg-center bg-no-repeat" style="background-image: url('https://images.unsplash.com/photo-1606811841689-23dfddce3e95?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80');">
+  <!-- Overlay oscuro/azulado para asegurar que el texto sea legible -->
+  <div class="absolute inset-0 bg-gray-900/75 bg-gradient-to-b from-gray-900/50 to-blue-900/80 mix-blend-multiply"></div>
+
+  <div class="relative max-w-4xl mx-auto px-4 z-10">
     <!-- Etiqueta descriptiva o eslogan -->
-    <span class="bg-blue-100 text-blue-700 text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full">
+    <span class="bg-blue-500/20 text-blue-200 border border-blue-400/30 text-xs font-bold uppercase tracking-widest px-4 py-1.5 rounded-full backdrop-blur-sm">
       Tecnología Dental de Vanguardia
     </span>
-    <h1 class="mt-6 text-5xl md:text-7xl font-extrabold tracking-tight text-gray-900 leading-tight">
+    <h1 class="mt-8 text-5xl md:text-7xl font-extrabold tracking-tight text-white leading-tight drop-shadow-lg">
       Tu sonrisa merece <br/>
-      <span class="text-blue-600 italic">cuidado profesional.</span>
+      <span class="text-blue-400 italic">cuidado profesional.</span>
     </h1>
-    <p class="mt-6 text-lg text-gray-600 max-w-2xl mx-auto">
+    <p class="mt-6 text-lg text-gray-200 max-w-2xl mx-auto font-light drop-shadow">
       En DentalPro combinamos la mejor tecnología con un equipo humano especializado para devolverte la confianza al sonreír.
     </p>
     <!-- Contenedor de botones de acción -->
     <div class="mt-10 flex flex-col sm:flex-row justify-center gap-4">
       <!-- Botón principal para tratamientos -->
-      <button type="button" routerLink="/servicios" class="bg-gray-900 text-white px-8 py-4 rounded-2xl font-bold hover:scale-105 transition-transform shadow-xl">
+      <button type="button" routerLink="/servicios" class="bg-blue-600 text-white px-8 py-4 rounded-2xl font-bold hover:bg-blue-700 hover:scale-105 transition-all shadow-xl shadow-blue-900/20">
         Nuestros Tratamientos
       </button>
       <!-- Botón secundario para instalaciones -->
-      <button type="button" class="bg-white border-2 border-gray-200 px-8 py-4 rounded-2xl font-bold hover:bg-gray-50 transition">
+      <button type="button" class="bg-white/10 backdrop-blur-md border border-white/30 text-white px-8 py-4 rounded-2xl font-bold hover:bg-white/20 transition-all">
         Ver Instalaciones
       </button>
     </div>
