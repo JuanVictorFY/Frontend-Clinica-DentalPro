@@ -1,15 +1,17 @@
-/* To learn more about Typescript configuration file: https://www.typescriptlang.org/docs/handbook/tsconfig-json.html. */
-/* To learn more about Angular compiler options: https://angular.dev/reference/configs/angular-compiler-options. */
 {
+  // Hereda la configuración principal de TypeScript de tu proyecto
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "outDir": "./out-tsc/spec",
+    // Carga los tipos globales necesarios para las pruebas (en este caso, de Vitest)
     "types": [
       "vitest/globals"
     ]
   },
+  // Archivos que TypeScript analizará bajo esta configuración específica
   "include": [
+    // Archivos de definición de tipos
     "src/**/*.d.ts",
+    // Archivos donde escribes tus pruebas (tests)
     "src/**/*.spec.ts"
   ]
 }
