@@ -1,59 +1,77 @@
-# FrontendClinicaDentalPro
+# 🦷 Frontend Clínica DentalPro
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.2.9.
+!Angular
+!TailwindCSS
+!TypeScript
 
-## Development server
+Bienvenido al repositorio frontend de **Clínica DentalPro**. Esta aplicación está construida con las últimas tecnologías web para ofrecer una experiencia rápida, moderna y responsiva a los pacientes de la clínica.
 
-To start a local development server, run:
+## ✨ Características
 
+- **Página de Inicio:** Hero section moderno y resumen de especialidades.
+- **Catálogo de Servicios:** Tarjetas detalladas con los tratamientos odontológicos ofrecidos.
+- **Sección Nosotros:** Información sobre la misión, visión y experiencia de la clínica.
+- **Diseño Responsivo:** Adaptable a dispositivos móviles, tablets y escritorio usando Tailwind CSS.
+- **Enrutamiento Dinámico:** Navegación fluida sin recargas de página (Angular Router).
+
+## 🛠️ Tecnologías Utilizadas
+
+- **Framework:** Angular 21 (Standalone Components)
+- **Estilos:** Tailwind CSS v4
+- **Lenguaje:** TypeScript
+- **Testing:** Vitest
+
+## 🚀 Requisitos Previos
+
+Antes de comenzar, asegúrate de tener instalado:
+- Node.js (versión 18 o superior)
+- `npm` (incluido con Node.js)
+
+## 📦 Instalación
+
+1. Clona este repositorio:
+   ```bash
+   git clone https://github.com/tu-usuario/Frontend-Clinica-DentalPro.git
+   ```
+2. Navega al directorio del proyecto:
+   ```bash
+   cd Frontend-Clinica-DentalPro
+   ```
+3. Instala las dependencias:
+   ```bash
+   npm install
+   ```
+
+## 💻 Servidor de Desarrollo
+
+Para iniciar el servidor local de desarrollo, ejecuta:
+
+```bash
+npm start
+```
+O usando el CLI de Angular:
 ```bash
 ng serve
 ```
+Una vez que el servidor esté en funcionamiento, abre tu navegador y visita `http://localhost:4200/`. La aplicación se recargará automáticamente si modificas algún archivo fuente.
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+## 🏗️ Construcción para Producción
 
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
-
-```bash
-ng generate component component-name
-```
-
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+Para compilar el proyecto para producción, ejecuta:
 
 ```bash
-ng generate --help
+npm run build
 ```
-
-## Building
-
-To build the project run:
-
+O usando el CLI:
 ```bash
 ng build
 ```
+Esto compilará tu proyecto y almacenará los artefactos optimizados en el directorio `dist/`.
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+## 🧪 Pruebas Unitarias
 
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
+Para ejecutar las pruebas unitarias con Vitest, usa el siguiente comando:
 
 ```bash
-ng e2e
+npm test
 ```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
