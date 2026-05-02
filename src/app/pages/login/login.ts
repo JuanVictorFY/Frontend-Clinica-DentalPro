@@ -1,5 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
+import { USERS_MOCK } from '../data/users.data';
 
 @Component({
   selector: 'app-login',
@@ -14,15 +16,27 @@ export class Login {
   isLoading = false;
   isRecovering = false;
   isSent = false;
+  errorMessage = '';
+
+  private router = inject(Router);
 
   onSubmit() {
     if (!this.email || !this.password) return;
 
     this.isLoading = true;
+    this.errorMessage = ''; // Limpiar errores previos
+
     // Simulación de petición al servidor
     setTimeout(() => {
       this.isLoading = false;
-      alert(`¡Bienvenido a DentalPro!\n\nSe ha iniciado sesión con: ${this.email}`);
+
+      const user = USERS_MOCK.find(u => u.email === this.email && u.password === this.password);
+
+      if (user) {
+        this.router.navigate(['/intranet']);
+      } else {
+        this.errorMessage = 'Correo o contraseña incorrectos. Inténtalo de nuevo.';
+      }
     }, 1500);
   }
 
