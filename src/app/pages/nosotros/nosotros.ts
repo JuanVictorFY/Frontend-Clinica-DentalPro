@@ -45,3 +45,4 @@ export class Nosotros implements AfterViewInit, OnDestroy {
     this.startAutoScroll();
   }
 }
+
