@@ -42,3 +42,4 @@ export class Navbar implements OnInit, OnDestroy {
     this.mobileMenuOpen.set(false);
   }
 }
+
