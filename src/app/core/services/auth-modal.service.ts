@@ -8,3 +8,4 @@ export class AuthModalService {
   open(v: ModalView) { this.view.set(v); }
   close() { this.view.set('none'); }
 }
+
