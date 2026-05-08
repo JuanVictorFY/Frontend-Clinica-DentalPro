@@ -27,3 +27,5 @@ export const roleGuard: CanActivateFn = (route: ActivatedRouteSnapshot) => {
   router.navigate(['/intranet/acceso-denegado']);
   return false;
 };
+
+
