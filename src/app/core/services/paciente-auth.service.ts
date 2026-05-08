@@ -39,3 +39,4 @@ export class PacienteAuthService {
     return this.http.post<{ mensaje: string }>(`${API}/reset-password`, { email, code, newPassword });
   }
 }
+
