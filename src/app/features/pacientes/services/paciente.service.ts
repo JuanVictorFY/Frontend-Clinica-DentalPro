@@ -49,3 +49,4 @@ export class PacienteService {
     return this.http.delete<void>(`${API}/pacientes/${id}`);
   }
 }
+
