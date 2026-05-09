@@ -18,3 +18,4 @@ export class HistorialClinicoService {
     return this.http.put<HistorialClinico>(`${API}/historial/paciente/${pacienteId}`, dto);
   }
 }
+
