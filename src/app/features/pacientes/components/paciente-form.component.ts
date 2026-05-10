@@ -242,3 +242,4 @@ export class PacienteFormComponent implements OnInit {
     this.router.navigate(['/intranet/pacientes']);
   }
 }
+
