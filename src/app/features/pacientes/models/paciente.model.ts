@@ -14,3 +14,4 @@ export interface PacienteRequest {
   telefono: string;
   email: string;
 }
+

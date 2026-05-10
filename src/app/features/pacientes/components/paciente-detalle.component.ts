@@ -408,3 +408,4 @@ export class PacienteDetalleComponent implements OnInit {
     this.router.navigate(['/intranet/pacientes/editar', this.id()]);
   }
 }
+

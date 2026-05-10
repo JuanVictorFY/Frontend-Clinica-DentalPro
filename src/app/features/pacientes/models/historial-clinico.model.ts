@@ -7,3 +7,4 @@ export interface HistorialClinico {
   grupoSanguineo: string | null;
   fechaActualizacion: string | null;
 }
+
