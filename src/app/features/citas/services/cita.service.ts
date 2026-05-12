@@ -72,3 +72,5 @@ export class CitaService {
     return this.http.patch<Cita>(`${API}/citas/${id}/estado`, { estado });
   }
 }
+
+
