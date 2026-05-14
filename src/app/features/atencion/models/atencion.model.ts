@@ -16,3 +16,4 @@ export interface NotaClinicaRequest {
   tratamiento: string;
   observaciones: string;
 }
+

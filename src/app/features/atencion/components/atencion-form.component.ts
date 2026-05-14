@@ -244,3 +244,5 @@ export class AtencionFormComponent implements OnInit {
     this.router.navigate(['/intranet/atencion']);
   }
 }
+
+
