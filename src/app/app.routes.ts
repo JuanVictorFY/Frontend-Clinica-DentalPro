@@ -3,6 +3,7 @@ import { Routes } from '@angular/router';
 import { Home } from './pages/home/home';
 import { Servicios } from './pages/servicios/servicios';
 import { Nosotros } from './pages/nosotros/nosotros';
+import { Contacto } from './pages/contacto/contacto';
 
 import { authGuard } from './core/guards/auth.guard';
 import { roleGuard } from './core/guards/role.guard';
@@ -13,6 +14,7 @@ export const routes: Routes = [
   { path: '', component: Home, pathMatch: 'full' },
   { path: 'servicios', component: Servicios },
   { path: 'nosotros', component: Nosotros },
+  { path: 'contacto', component: Contacto },
   {
     path: 'login',
     loadComponent: () =>
