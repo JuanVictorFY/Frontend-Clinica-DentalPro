@@ -1,0 +1,52 @@
+import { Component, input } from '@angular/core';
+
+@Component({
+  selector: 'app-loading-spinner',
+  standalone: true,
+  template: `
+    <div class="flex items-center justify-center p-4" role="status" aria-label="Cargando">
+      <svg
+        class="animate-spin text-blue-600"
+        [class]="sizeClasses()"
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+      >
+        <circle
+          class="opacity-25"
+          cx="12"
+          cy="12"
+          r="10"
+          stroke="currentColor"
+          stroke-width="4"
+        ></circle>
+        <path
+          class="opacity-75"
+          fill="currentColor"
+          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+        ></path>
+      </svg>
+      @if (message()) {
+        <span class="ml-2 text-sm text-gray-600">{{ message() }}</span>
+      }
+    </div>
+  `,
+  styles: `
+    :host {
+      display: block;
+    }
+  `
+})
+export class LoadingSpinnerComponent {
+  readonly size = input<'sm' | 'md' | 'lg'>('md');
+  readonly message = input<string>('');
+
+  protected sizeClasses(): string {
+    const sizes: Record<string, string> = {
+      sm: 'h-4 w-4',
+      md: 'h-8 w-8',
+      lg: 'h-12 w-12'
+    };
+    return `animate-spin text-blue-600 ${sizes[this.size()]}`;
+  }
+}
