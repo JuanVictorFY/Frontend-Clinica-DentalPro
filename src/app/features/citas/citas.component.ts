@@ -2,6 +2,7 @@ import { Component, inject, signal, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { CitaService } from './services/cita.service';
 import { Cita, EstadoCita, isTransicionValida } from './models/cita.model';
+import { ToastService } from '../../shared/services/toast.service';
 
 @Component({
   selector: 'app-citas',
@@ -125,6 +126,7 @@ import { Cita, EstadoCita, isTransicionValida } from './models/cita.model';
 export class CitasComponent implements OnInit {
   private readonly citaService = inject(CitaService);
   private readonly router = inject(Router);
+  private readonly toast = inject(ToastService);
 
   readonly fechaSeleccionada = signal(new Date().toISOString().split('T')[0]);
   readonly citasFiltradas = signal<Cita[]>([]);
@@ -154,6 +156,7 @@ export class CitasComponent implements OnInit {
     if (confirmado) {
       this.citaService.atender(cita.id);
       this.cargarCitas();
+      this.toast.success('Cita marcada como atendida');
     }
   }
 
@@ -164,6 +167,7 @@ export class CitasComponent implements OnInit {
     if (confirmado) {
       this.citaService.cancelar(cita.id);
       this.cargarCitas();
+      this.toast.warning('Cita cancelada');
     }
   }
 

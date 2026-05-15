@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { UsuarioService } from './services/usuario.service';
 import { Usuario } from './models/usuario.model';
 import { UserRole } from '../../core/models/user.model';
+import { ToastService } from '../../shared/services/toast.service';
 
 @Component({
   selector: 'app-usuarios',
@@ -106,6 +107,7 @@ import { UserRole } from '../../core/models/user.model';
 export class UsuariosComponent implements OnInit {
   private readonly usuarioService = inject(UsuarioService);
   private readonly router = inject(Router);
+  private readonly toast = inject(ToastService);
 
   readonly usuarios = signal<Usuario[]>([]);
 
@@ -142,6 +144,7 @@ export class UsuariosComponent implements OnInit {
     if (confirmado) {
       this.usuarioService.eliminar(usuario.id);
       this.usuarios.set(this.usuarioService.listar());
+      this.toast.success('Usuario eliminado correctamente');
     }
   }
 }

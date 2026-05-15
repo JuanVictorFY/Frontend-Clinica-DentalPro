@@ -3,6 +3,7 @@ import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angula
 import { Router } from '@angular/router';
 import { UsuarioService } from '../services/usuario.service';
 import { UserRole } from '../../../core/models/user.model';
+import { ToastService } from '../../../shared/services/toast.service';
 
 /**
  * Componente de formulario reactivo para registrar/editar usuarios.
@@ -147,6 +148,7 @@ export class UsuarioFormComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly router = inject(Router);
   private readonly usuarioService = inject(UsuarioService);
+  private readonly toast = inject(ToastService);
 
   /** ID del usuario para modo edición (viene de la ruta) */
   readonly usuarioId = input<string | undefined>(undefined, { alias: 'id' });
@@ -204,8 +206,10 @@ export class UsuarioFormComponent implements OnInit {
     if (this.esEdicion()) {
       const id = Number(this.usuarioId());
       this.usuarioService.actualizar(id, datos);
+      this.toast.success('Usuario actualizado exitosamente');
     } else {
       this.usuarioService.registrar(datos);
+      this.toast.success('Usuario registrado exitosamente');
     }
 
     this.isLoading.set(false);

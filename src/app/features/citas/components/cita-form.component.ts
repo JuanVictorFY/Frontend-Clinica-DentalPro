@@ -5,6 +5,7 @@ import { CitaService } from '../services/cita.service';
 import { PacienteService } from '../../pacientes/services/paciente.service';
 import { Paciente } from '../../pacientes/models/paciente.model';
 import { Odontologo } from '../models/cita.model';
+import { ToastService } from '../../../shared/services/toast.service';
 
 @Component({
   selector: 'app-cita-form',
@@ -163,6 +164,7 @@ export class CitaFormComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly citaService = inject(CitaService);
   private readonly pacienteService = inject(PacienteService);
+  private readonly toast = inject(ToastService);
 
   /** ID de la cita para modo edición (viene de la ruta) */
   readonly citaId = input<string | undefined>(undefined, { alias: 'id' });
@@ -239,8 +241,10 @@ export class CitaFormComponent implements OnInit {
     if (this.esEdicion()) {
       const id = Number(this.citaId());
       this.citaService.actualizar(id, request);
+      this.toast.success('Cita actualizada exitosamente');
     } else {
       this.citaService.registrar(request);
+      this.toast.success('Cita registrada exitosamente');
     }
 
     this.isLoading.set(false);

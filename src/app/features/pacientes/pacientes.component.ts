@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { SearchInputComponent } from '../../shared/components/search-input/search-input.component';
 import { PacienteService } from './services/paciente.service';
 import { Paciente } from './models/paciente.model';
+import { ToastService } from '../../shared/services/toast.service';
 
 @Component({
   selector: 'app-pacientes',
@@ -98,6 +99,7 @@ import { Paciente } from './models/paciente.model';
 export class PacientesComponent implements OnInit {
   private readonly pacienteService = inject(PacienteService);
   private readonly router = inject(Router);
+  private readonly toast = inject(ToastService);
 
   readonly pacientesFiltrados = signal<Paciente[]>([]);
 
@@ -124,6 +126,7 @@ export class PacientesComponent implements OnInit {
     if (confirmado) {
       this.pacienteService.eliminar(paciente.id);
       this.pacientesFiltrados.set(this.pacienteService.listar());
+      this.toast.success('Paciente eliminado correctamente');
     }
   }
 }

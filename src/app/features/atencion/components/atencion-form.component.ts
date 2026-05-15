@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { AtencionService } from '../services/atencion.service';
 import { CitaService } from '../../citas/services/cita.service';
 import { Cita, EstadoCita } from '../../citas/models/cita.model';
+import { ToastService } from '../../../shared/services/toast.service';
 
 @Component({
   selector: 'app-atencion-form',
@@ -153,6 +154,7 @@ export class AtencionFormComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly atencionService = inject(AtencionService);
   private readonly citaService = inject(CitaService);
+  private readonly toast = inject(ToastService);
 
   /** ID de la cita (viene de la ruta) */
   readonly citaId = input<string | undefined>(undefined);
@@ -213,6 +215,7 @@ export class AtencionFormComponent implements OnInit {
     });
 
     this.isLoading.set(false);
+    this.toast.success('Atención finalizada correctamente');
     this.router.navigate(['/intranet/atencion']);
   }
 
