@@ -1,61 +1,29 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { AtencionService } from '../../atencion/services/atencion.service';
+import { Reporte } from '../models/reporte.model';
 
-import { environment } from '../../../../environments/environment';
-import { PaginatedResponse } from '../../../core/models/api-response.model';
-import { Reporte, ReporteFiltros } from '../models/reporte.model';
-
-@Injectable({ providedIn: 'root' })
+@Injectable({
+  providedIn: 'root'
+})
 export class ReporteService {
-  private readonly http = inject(HttpClient);
-  private readonly API_URL = `${environment.apiUrl}/reportes`;
+  private readonly atencionService = inject(AtencionService);
 
-  /**
-   * Genera un reporte de atención para una cita finalizada.
-   */
-  generar(citaId: number): Observable<Reporte> {
-    return this.http.post<Reporte>(`${this.API_URL}/generar/${citaId}`, null);
+  /** Retorna todas las notas clínicas como reportes */
+  listar(): Reporte[] {
+    return this.atencionService.listarNotasClinicas().map(nota => ({
+      id: nota.id,
+      citaId: nota.citaId,
+      pacienteNombre: nota.pacienteNombre,
+      odontologoNombre: nota.odontologoNombre,
+      diagnostico: nota.diagnostico,
+      tratamiento: nota.tratamiento,
+      observaciones: nota.observaciones,
+      fecha: nota.fecha
+    }));
   }
 
-  /**
-   * Obtiene el reporte asociado a una cita específica.
-   */
-  obtenerPorCita(citaId: number): Observable<Reporte> {
-    return this.http.get<Reporte>(`${this.API_URL}/cita/${citaId}`);
-  }
-
-  /**
-   * Lista reportes paginados con filtros opcionales.
-   */
-  listar(filtros: ReporteFiltros): Observable<PaginatedResponse<Reporte>> {
-    let params = new HttpParams();
-
-    if (filtros.fechaDesde) {
-      params = params.set('fechaDesde', filtros.fechaDesde);
-    }
-    if (filtros.fechaHasta) {
-      params = params.set('fechaHasta', filtros.fechaHasta);
-    }
-    if (filtros.pacienteId) {
-      params = params.set('pacienteId', filtros.pacienteId.toString());
-    }
-    if (filtros.page != null) {
-      params = params.set('page', filtros.page.toString());
-    }
-    if (filtros.size != null) {
-      params = params.set('size', filtros.size.toString());
-    }
-
-    return this.http.get<PaginatedResponse<Reporte>>(this.API_URL, { params });
-  }
-
-  /**
-   * Descarga el reporte en formato PDF.
-   */
-  descargarPdf(reporteId: number): Observable<Blob> {
-    return this.http.get(`${this.API_URL}/${reporteId}/pdf`, {
-      responseType: 'blob'
-    });
+  /** Obtiene un reporte por su ID */
+  obtenerPorId(id: number): Reporte | undefined {
+    return this.listar().find(r => r.id === id);
   }
 }
