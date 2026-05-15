@@ -1,8 +1,17 @@
-<nav class="fixed top-0 w-full bg-gray-950/90 backdrop-blur-lg border-b border-gray-800/50 z-50">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="flex justify-between h-18 items-center">
+<nav
+  class="fixed top-0 w-full z-50 transition-all duration-300"
+  [class.bg-transparent]="!scrolled()"
+  [class.bg-gray-950/85]="scrolled()"
+  [class.backdrop-blur-xl]="scrolled()"
+  [class.shadow-lg]="scrolled()"
+  [class.shadow-black/20]="scrolled()"
+  [class.border-b]="scrolled()"
+  [class.border-gray-800/40]="scrolled()"
+>
+  <div class="max-w-[1200px] mx-auto px-6">
+    <div class="flex justify-between items-center py-5">
       <!-- Logo -->
-      <a routerLink="/" class="flex items-center gap-2" (click)="closeMobileMenu()">
+      <a routerLink="/" class="flex items-center gap-2.5" (click)="closeMobileMenu()">
         <svg class="w-8 h-8 text-blue-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
           <path stroke-linecap="round" stroke-linejoin="round" d="M12 3c-1.2 0-2.4.6-3 1.5C8.4 3.6 7.2 3 6 3c-2.5 0-4.5 2-4.5 4.5 0 5 6.5 9.5 10.5 12.5 4-3 10.5-7.5 10.5-12.5C22.5 5 20.5 3 18 3c-1.2 0-2.4.6-3 1.5-.6-.9-1.8-1.5-3-1.5z"/>
         </svg>
@@ -12,24 +21,22 @@
       </a>
 
       <!-- Navigation Links -->
-      <div class="flex items-center gap-6 lg:gap-8">
-        <a routerLink="/" routerLinkActive="text-blue-400" [routerLinkActiveOptions]="{exact: true}" class="text-sm font-semibold text-gray-300 hover:text-blue-400 transition-colors">Inicio</a>
-        <a routerLink="/servicios" routerLinkActive="text-blue-400" class="text-sm font-semibold text-gray-300 hover:text-blue-400 transition-colors">Servicios</a>
-        <a routerLink="/nosotros" routerLinkActive="text-blue-400" class="text-sm font-semibold text-gray-300 hover:text-blue-400 transition-colors">Nosotros</a>
-        <a routerLink="/contacto" routerLinkActive="text-blue-400" class="text-sm font-semibold text-gray-300 hover:text-blue-400 transition-colors">Contacto</a>
+      <div class="hidden md:flex items-center gap-7 lg:gap-9">
+        <a routerLink="/" routerLinkActive="!text-white" [routerLinkActiveOptions]="{exact: true}" class="text-sm font-medium text-white/70 hover:text-white transition-all duration-300">Inicio</a>
+        <a routerLink="/servicios" routerLinkActive="!text-white" class="text-sm font-medium text-white/70 hover:text-white transition-all duration-300">Servicios</a>
+        <a routerLink="/nosotros" routerLinkActive="!text-white" class="text-sm font-medium text-white/70 hover:text-white transition-all duration-300">Nosotros</a>
+        <a routerLink="/contacto" routerLinkActive="!text-white" class="text-sm font-medium text-white/70 hover:text-white transition-all duration-300">Contacto</a>
       </div>
 
       <!-- Actions -->
       <div class="flex items-center gap-4">
-        <a routerLink="/login" class="text-sm font-semibold text-gray-400 hover:text-white transition-colors hidden sm:block">
+        <a routerLink="/login" class="text-sm font-medium text-white/70 hover:text-white transition-all duration-300 hidden sm:block">
           Iniciar Sesión
         </a>
-        <a routerLink="/contacto" class="bg-blue-600 text-white px-5 py-2 rounded-full text-sm font-bold hover:bg-blue-500 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-blue-500/40 active:scale-95 transition-all duration-300">
+        <a routerLink="/contacto" class="border border-blue-400 text-blue-400 px-4 py-2 rounded-full text-sm font-semibold hover:bg-blue-600 hover:text-white hover:border-blue-600 hover:shadow-lg hover:shadow-blue-500/30 active:scale-95 transition-all duration-300">
           Agendar Cita
         </a>
       </div>
     </div>
   </div>
-
-
 </nav>

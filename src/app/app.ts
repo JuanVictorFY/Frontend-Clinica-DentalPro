@@ -1,7 +1,10 @@
-import { Component, signal } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { Component, inject, computed } from '@angular/core';
+import { Router, RouterOutlet, NavigationEnd } from '@angular/router';
+import { filter, map } from 'rxjs';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { Navbar } from './components/navbar/navbar';
 import { Footer } from './components/footer/footer';
+
 @Component({
   selector: 'app-root',
   standalone: true,
@@ -10,5 +13,20 @@ import { Footer } from './components/footer/footer';
   styleUrl: './app.css'
 })
 export class App {
-  protected readonly title = signal('DentalPro');
+  private readonly router = inject(Router);
+
+  /** Señal que indica si la ruta actual es de la intranet o login */
+  private readonly currentUrl = toSignal(
+    this.router.events.pipe(
+      filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+      map(event => event.urlAfterRedirects)
+    ),
+    { initialValue: this.router.url }
+  );
+
+  /** Ocultar navbar y footer en rutas de intranet y login */
+  readonly showPublicLayout = computed(() => {
+    const url = this.currentUrl();
+    return !url.startsWith('/intranet') && !url.startsWith('/login');
+  });
 }
