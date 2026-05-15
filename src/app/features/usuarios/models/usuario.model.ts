@@ -14,3 +14,4 @@ export interface UsuarioRequest {
   password: string;
   rol: UserRole;
 }
+
