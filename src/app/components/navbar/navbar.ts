@@ -1,4 +1,5 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, inject, PLATFORM_ID, OnInit, OnDestroy } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 
 @Component({
@@ -8,8 +9,28 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
   templateUrl: './navbar.html',
   styleUrl: './navbar.css',
 })
-export class Navbar {
+export class Navbar implements OnInit, OnDestroy {
+  private platformId = inject(PLATFORM_ID);
+
   mobileMenuOpen = signal(false);
+  scrolled = signal(false);
+
+  private scrollHandler: (() => void) | null = null;
+
+  ngOnInit() {
+    if (isPlatformBrowser(this.platformId)) {
+      this.scrollHandler = () => {
+        this.scrolled.set(window.scrollY > 20);
+      };
+      window.addEventListener('scroll', this.scrollHandler, { passive: true });
+    }
+  }
+
+  ngOnDestroy() {
+    if (isPlatformBrowser(this.platformId) && this.scrollHandler) {
+      window.removeEventListener('scroll', this.scrollHandler);
+    }
+  }
 
   toggleMobileMenu() {
     this.mobileMenuOpen.update(v => !v);
