@@ -6,48 +6,23 @@ import { RouterLink } from '@angular/router';
   standalone: true,
   imports: [RouterLink],
   template: `
-    <div class="min-h-screen flex items-center justify-center bg-gray-50 px-4">
-      <div class="max-w-md w-full text-center">
-        <!-- Icono de acceso denegado -->
-        <div class="mx-auto flex items-center justify-center h-20 w-20 rounded-full bg-red-100 mb-6">
-          <svg
-            class="h-10 w-10 text-red-600"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            stroke-width="2"
-            aria-hidden="true"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"
-            />
+    <div class="flex items-center justify-center min-h-[60vh]">
+      <div class="text-center bg-gray-900 border border-gray-800 rounded-2xl p-12 max-w-md w-full">
+        <div class="w-16 h-16 mx-auto mb-6 rounded-full bg-red-500/10 border border-red-500/30 flex items-center justify-center">
+          <svg class="w-8 h-8 text-red-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/>
           </svg>
         </div>
-
-        <!-- Mensaje principal -->
-        <h1 class="text-3xl font-bold text-gray-900 mb-2">Acceso Denegado</h1>
-        <p class="text-gray-600 mb-8">
-          No tiene permisos para acceder a esta sección. Contacte al administrador si cree que esto es un error.
-        </p>
-
-        <!-- Botón para volver al panel principal -->
+        <h1 class="text-2xl font-bold text-white mb-2">Acceso Denegado</h1>
+        <p class="text-gray-400 mb-8">No tienes permisos para acceder a esta sección.</p>
         <a
           routerLink="/intranet"
-          class="inline-flex items-center gap-2 rounded-md bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 transition-colors"
+          class="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white font-medium rounded-xl hover:bg-blue-500 transition-colors"
         >
-          <svg
-            class="h-4 w-4"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            stroke-width="2"
-            aria-hidden="true"
-          >
-            <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/>
           </svg>
-          Volver al panel principal
+          Volver al panel
         </a>
       </div>
     </div>
