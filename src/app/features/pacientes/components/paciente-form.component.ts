@@ -2,6 +2,7 @@ import { Component, inject, signal, OnInit, input } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { PacienteService } from '../services/paciente.service';
+import { ToastService } from '../../../shared/services/toast.service';
 
 /**
  * Componente de formulario reactivo para registrar/editar pacientes.
@@ -160,6 +161,7 @@ export class PacienteFormComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly router = inject(Router);
   private readonly pacienteService = inject(PacienteService);
+  private readonly toast = inject(ToastService);
 
   /** ID del paciente para modo edición (viene de la ruta) */
   readonly pacienteId = input<string | undefined>(undefined, { alias: 'id' });
@@ -216,8 +218,10 @@ export class PacienteFormComponent implements OnInit {
     if (this.esEdicion()) {
       const id = Number(this.pacienteId());
       this.pacienteService.actualizar(id, datos);
+      this.toast.success('Paciente actualizado exitosamente');
     } else {
       this.pacienteService.registrar(datos);
+      this.toast.success('Paciente registrado exitosamente');
     }
 
     this.isLoading.set(false);

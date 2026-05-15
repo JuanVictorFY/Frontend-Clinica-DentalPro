@@ -4,11 +4,12 @@ import { filter, map } from 'rxjs';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Navbar } from './components/navbar/navbar';
 import { Footer } from './components/footer/footer';
+import { ToastContainerComponent } from './shared/components/toast-container/toast-container.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, Navbar, Footer],
+  imports: [RouterOutlet, Navbar, Footer, ToastContainerComponent],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
