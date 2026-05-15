@@ -1,64 +1,67 @@
 import { HttpInterceptorFn, HttpErrorResponse } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { catchError, throwError, timeout } from 'rxjs';
-
+import { catchError, timeout, throwError } from 'rxjs';
 import { AuthService } from '../services/auth.service';
-import { NotificationService } from '../services/notification.service';
-
-/** Timeout en milisegundos para las peticiones HTTP. */
-const REQUEST_TIMEOUT_MS = 30000;
 
 /**
- * Interceptor funcional HTTP que:
- * 1. Adjunta el token JWT en el header Authorization de cada petición.
- * 2. Configura un timeout de 30 segundos.
- * 3. Maneja errores globales: 401, 403, 500 y timeout.
- *
- * Validates: Requirements 16.1, 16.2, 16.3, 16.4, 16.5
+ * Interceptor HTTP funcional para autenticación JWT.
+ * - Inyecta el token en cada petición saliente.
+ * - Maneja errores globales (401, 403, 500, timeout).
  */
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const authService = inject(AuthService);
   const router = inject(Router);
-  const notificationService = inject(NotificationService);
 
+  // Obtener token del localStorage
   const token = authService.getToken();
 
-  let authReq = req;
-  if (token) {
-    authReq = req.clone({
-      setHeaders: { Authorization: `Bearer ${token}` }
-    });
-  }
+  // Clonar la petición para agregar el header de autorización
+  const clonedReq = token
+    ? req.clone({
+        setHeaders: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+    : req;
 
-  return next(authReq).pipe(
-    timeout(REQUEST_TIMEOUT_MS),
+  return next(clonedReq).pipe(
+    // Timeout de 30 segundos para evitar peticiones colgadas
+    timeout(30000),
+
     catchError((error: HttpErrorResponse | Error) => {
+      // Manejar timeout de RxJS (no es HttpErrorResponse)
       if (error.name === 'TimeoutError') {
-        notificationService.showError('Tiempo de espera agotado. Intente nuevamente.');
+        console.error('[DentalPro] La petición ha excedido el tiempo límite (30s).');
         return throwError(() => error);
       }
 
+      // Manejar errores HTTP
       if (error instanceof HttpErrorResponse) {
         switch (error.status) {
           case 401:
+            // Token expirado o inválido: cerrar sesión y redirigir
+            console.warn('[DentalPro] Sesión expirada o no autorizada. Redirigiendo al login...');
             authService.logout();
-            router.navigate(['/login'], {
-              queryParams: { reason: 'session-expired' }
-            });
             break;
+
           case 403:
-            notificationService.showWarning('No tiene permisos para realizar esta acción.');
+            // Acceso denegado: el usuario no tiene permisos
+            console.warn('[DentalPro] Acceso denegado (403). No tiene permisos para este recurso.');
             break;
+
           case 500:
-            notificationService.showError('Error del servidor. Intente más tarde.');
+            // Error interno del servidor
+            console.error('[DentalPro] Error interno del servidor (500):', error.message);
             break;
-          case 0:
-            notificationService.showError('Sin conexión. Verifique su red.');
+
+          default:
+            console.error(`[DentalPro] Error HTTP ${error.status}:`, error.message);
             break;
         }
       }
 
+      // Re-lanzar el error para que los componentes puedan manejarlo también
       return throwError(() => error);
     })
   );
