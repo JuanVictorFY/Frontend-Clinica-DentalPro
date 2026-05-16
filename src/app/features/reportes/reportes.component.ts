@@ -3,11 +3,12 @@ import { Router } from '@angular/router';
 import { ReporteService } from './services/reporte.service';
 import { Reporte } from './models/reporte.model';
 import { PaginationComponent } from '../../shared/components/pagination/pagination.component';
+import { TableSkeletonComponent } from '../../shared/components/table-skeleton/table-skeleton.component';
 
 @Component({
   selector: 'app-reportes',
   standalone: true,
-  imports: [PaginationComponent],
+  imports: [PaginationComponent, TableSkeletonComponent],
   template: `
     <div class="space-y-6">
       <!-- Header -->
@@ -16,8 +17,10 @@ import { PaginationComponent } from '../../shared/components/pagination/paginati
         <p class="text-gray-400 text-sm mt-1">Notas clínicas generadas a partir de citas atendidas</p>
       </div>
 
-      <!-- Tabla -->
-      @if (reportes().length === 0) {
+      <!-- Skeleton de carga -->
+      @if (isLoading()) {
+        <app-table-skeleton [columns]="5" [rows]="5" />
+      } @else if (reportes().length === 0) {
         <div class="w-full rounded-xl border border-gray-700 bg-gray-900 p-8 flex flex-col items-center justify-center gap-3">
           <svg class="w-12 h-12 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
@@ -82,6 +85,7 @@ export class ReportesComponent implements OnInit {
   private readonly reporteService = inject(ReporteService);
   private readonly router = inject(Router);
 
+  readonly isLoading = signal(true);
   readonly reportes = signal<Reporte[]>([]);
   readonly currentPage = signal(1);
   readonly pageSize = 5;
@@ -93,7 +97,11 @@ export class ReportesComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    this.reportes.set(this.reporteService.listar());
+    // Simular carga desde API
+    setTimeout(() => {
+      this.reportes.set(this.reporteService.listar());
+      this.isLoading.set(false);
+    }, 600);
   }
 
   onPageChange(page: number): void {
