@@ -227,3 +227,5 @@ export class UsuarioFormComponent implements OnInit {
     this.router.navigate(['/intranet/usuarios']);
   }
 }
+
+

@@ -30,3 +30,5 @@ export class UsuarioService {
     return this.http.delete<void>(`${API}/${id}`);
   }
 }
+
+
