@@ -1,13 +1,15 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, computed, inject, signal, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { UsuarioService } from './services/usuario.service';
 import { Usuario } from './models/usuario.model';
 import { UserRole } from '../../core/models/user.model';
 import { ToastService } from '../../shared/services/toast.service';
+import { PaginationComponent } from '../../shared/components/pagination/pagination.component';
 
 @Component({
   selector: 'app-usuarios',
   standalone: true,
+  imports: [PaginationComponent],
   template: `
     <div class="space-y-6">
       <!-- Header -->
@@ -49,7 +51,7 @@ import { ToastService } from '../../shared/services/toast.service';
                 </tr>
               </thead>
               <tbody>
-                @for (usuario of usuarios(); track usuario.id) {
+                @for (usuario of paginatedUsuarios(); track usuario.id) {
                   <tr class="bg-gray-900 border-t border-gray-700 hover:bg-gray-800/70 transition-colors">
                     <td class="px-6 py-4 text-gray-200 font-medium">{{ usuario.nombreCompleto }}</td>
                     <td class="px-6 py-4 text-gray-300">{{ usuario.email }}</td>
@@ -99,6 +101,14 @@ import { ToastService } from '../../shared/services/toast.service';
             </table>
           </div>
         </div>
+
+        <!-- Paginación -->
+        <app-pagination
+          [currentPage]="currentPage()"
+          [totalItems]="usuarios().length"
+          [pageSize]="pageSize"
+          (pageChange)="onPageChange($event)"
+        />
       }
     </div>
   `,
@@ -110,9 +120,21 @@ export class UsuariosComponent implements OnInit {
   private readonly toast = inject(ToastService);
 
   readonly usuarios = signal<Usuario[]>([]);
+  readonly currentPage = signal(1);
+  readonly pageSize = 5;
+
+  readonly paginatedUsuarios = computed(() => {
+    const start = (this.currentPage() - 1) * this.pageSize;
+    const end = start + this.pageSize;
+    return this.usuarios().slice(start, end);
+  });
 
   ngOnInit(): void {
     this.usuarios.set(this.usuarioService.listar());
+  }
+
+  onPageChange(page: number): void {
+    this.currentPage.set(page);
   }
 
   getRolBadgeClass(rol: UserRole): string {
@@ -144,6 +166,7 @@ export class UsuariosComponent implements OnInit {
     if (confirmado) {
       this.usuarioService.eliminar(usuario.id);
       this.usuarios.set(this.usuarioService.listar());
+      this.currentPage.set(1);
       this.toast.success('Usuario eliminado correctamente');
     }
   }
