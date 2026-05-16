@@ -61,12 +61,16 @@ import { ToastService } from '../../../shared/services/toast.service';
             formControlName="dni"
             placeholder="Ej: 12345678"
             maxlength="8"
+            (blur)="validarDniDuplicado()"
             class="w-full px-4 py-2.5 rounded-lg bg-gray-800 border text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
-            [class.border-red-500]="isFieldInvalid('dni')"
-            [class.border-gray-600]="!isFieldInvalid('dni')"
+            [class.border-red-500]="isFieldInvalid('dni') || dniDuplicado()"
+            [class.border-gray-600]="!isFieldInvalid('dni') && !dniDuplicado()"
           />
           @if (isFieldInvalid('dni')) {
             <p class="mt-1 text-sm text-red-400">El DNI debe tener exactamente 8 dígitos numéricos.</p>
+          }
+          @if (dniDuplicado()) {
+            <p class="mt-1 text-sm text-red-400">Este DNI ya está registrado</p>
           }
         </div>
 
@@ -131,7 +135,7 @@ import { ToastService } from '../../../shared/services/toast.service';
         <div class="flex items-center gap-3 pt-2">
           <button
             type="submit"
-            [disabled]="pacienteForm.invalid || isLoading()"
+            [disabled]="pacienteForm.invalid || isLoading() || dniDuplicado()"
             class="flex-1 flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-medium text-white transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed bg-blue-600 hover:bg-blue-700"
           >
             @if (isLoading()) {
@@ -172,6 +176,9 @@ export class PacienteFormComponent implements OnInit {
   /** Señal para determinar si estamos en modo edición */
   readonly esEdicion = signal(false);
 
+  /** Señal para indicar si el DNI está duplicado */
+  readonly dniDuplicado = signal(false);
+
   /** Formulario reactivo con validaciones */
   readonly pacienteForm: FormGroup = this.fb.group({
     nombreCompleto: ['', [Validators.required]],
@@ -204,6 +211,18 @@ export class PacienteFormComponent implements OnInit {
     return !!(control && control.invalid && control.touched);
   }
 
+  /** Valida si el DNI ya existe al perder el foco */
+  validarDniDuplicado(): void {
+    const dniControl = this.pacienteForm.get('dni');
+    if (!dniControl || dniControl.invalid) {
+      this.dniDuplicado.set(false);
+      return;
+    }
+    const dni = dniControl.value;
+    const excludeId = this.esEdicion() ? Number(this.pacienteId()) : undefined;
+    this.dniDuplicado.set(this.pacienteService.existeDni(dni, excludeId));
+  }
+
   /** Maneja el envío del formulario */
   onSubmit(): void {
     if (this.pacienteForm.invalid) {
@@ -211,9 +230,17 @@ export class PacienteFormComponent implements OnInit {
       return;
     }
 
-    this.isLoading.set(true);
-
     const datos = this.pacienteForm.value;
+    const excludeId = this.esEdicion() ? Number(this.pacienteId()) : undefined;
+
+    // Validar DNI duplicado antes de guardar
+    if (this.pacienteService.existeDni(datos.dni, excludeId)) {
+      this.dniDuplicado.set(true);
+      this.toast.error('Ya existe un paciente con ese DNI');
+      return;
+    }
+
+    this.isLoading.set(true);
 
     if (this.esEdicion()) {
       const id = Number(this.pacienteId());
