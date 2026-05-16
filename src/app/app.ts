@@ -5,11 +5,12 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { Navbar } from './components/navbar/navbar';
 import { Footer } from './components/footer/footer';
 import { ToastContainerComponent } from './shared/components/toast-container/toast-container.component';
+import { ConfirmModalComponent } from './shared/components/confirm-modal/confirm-modal.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, Navbar, Footer, ToastContainerComponent],
+  imports: [RouterOutlet, Navbar, Footer, ToastContainerComponent, ConfirmModalComponent],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })

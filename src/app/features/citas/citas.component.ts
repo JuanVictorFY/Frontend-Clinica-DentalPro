@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { CitaService } from './services/cita.service';
 import { Cita, EstadoCita, isTransicionValida } from './models/cita.model';
 import { ToastService } from '../../shared/services/toast.service';
+import { ConfirmService } from '../../shared/services/confirm.service';
 
 @Component({
   selector: 'app-citas',
@@ -127,6 +128,7 @@ export class CitasComponent implements OnInit {
   private readonly citaService = inject(CitaService);
   private readonly router = inject(Router);
   private readonly toast = inject(ToastService);
+  private readonly confirmService = inject(ConfirmService);
 
   readonly fechaSeleccionada = signal(new Date().toISOString().split('T')[0]);
   readonly citasFiltradas = signal<Cita[]>([]);
@@ -149,10 +151,13 @@ export class CitasComponent implements OnInit {
     this.router.navigate(['/intranet/citas/editar', id]);
   }
 
-  onAtender(cita: Cita): void {
-    const confirmado = window.confirm(
-      `¿Marcar como atendida la cita de "${cita.pacienteNombre}" a las ${cita.hora}?`
-    );
+  async onAtender(cita: Cita): Promise<void> {
+    const confirmado = await this.confirmService.confirm({
+      title: 'Atender Cita',
+      message: `¿Marcar como atendida la cita de "${cita.pacienteNombre}" a las ${cita.hora}?`,
+      confirmText: 'Atender',
+      type: 'info'
+    });
     if (confirmado) {
       this.citaService.atender(cita.id);
       this.cargarCitas();
@@ -160,10 +165,13 @@ export class CitasComponent implements OnInit {
     }
   }
 
-  onCancelar(cita: Cita): void {
-    const confirmado = window.confirm(
-      `¿Está seguro de cancelar la cita de "${cita.pacienteNombre}" a las ${cita.hora}?`
-    );
+  async onCancelar(cita: Cita): Promise<void> {
+    const confirmado = await this.confirmService.confirm({
+      title: 'Cancelar Cita',
+      message: `¿Está seguro de cancelar la cita de "${cita.pacienteNombre}" a las ${cita.hora}?`,
+      confirmText: 'Cancelar Cita',
+      type: 'danger'
+    });
     if (confirmado) {
       this.citaService.cancelar(cita.id);
       this.cargarCitas();

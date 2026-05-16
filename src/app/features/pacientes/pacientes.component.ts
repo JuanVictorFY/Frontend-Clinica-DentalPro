@@ -5,6 +5,7 @@ import { PaginationComponent } from '../../shared/components/pagination/paginati
 import { PacienteService } from './services/paciente.service';
 import { Paciente } from './models/paciente.model';
 import { ToastService } from '../../shared/services/toast.service';
+import { ConfirmService } from '../../shared/services/confirm.service';
 
 @Component({
   selector: 'app-pacientes',
@@ -109,6 +110,7 @@ export class PacientesComponent implements OnInit {
   private readonly pacienteService = inject(PacienteService);
   private readonly router = inject(Router);
   private readonly toast = inject(ToastService);
+  private readonly confirmService = inject(ConfirmService);
 
   readonly pacientesFiltrados = signal<Paciente[]>([]);
   readonly currentPage = signal(1);
@@ -141,10 +143,13 @@ export class PacientesComponent implements OnInit {
     this.router.navigate(['/intranet/pacientes/editar', id]);
   }
 
-  onEliminar(paciente: Paciente): void {
-    const confirmado = window.confirm(
-      `¿Está seguro de eliminar al paciente "${paciente.nombreCompleto}"?`
-    );
+  async onEliminar(paciente: Paciente): Promise<void> {
+    const confirmado = await this.confirmService.confirm({
+      title: 'Eliminar Paciente',
+      message: `¿Está seguro de eliminar al paciente "${paciente.nombreCompleto}"? Esta acción no se puede deshacer.`,
+      confirmText: 'Eliminar',
+      type: 'danger'
+    });
     if (confirmado) {
       this.pacienteService.eliminar(paciente.id);
       this.pacientesFiltrados.set(this.pacienteService.listar());
