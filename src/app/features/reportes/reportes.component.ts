@@ -1,11 +1,13 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, computed, inject, signal, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { ReporteService } from './services/reporte.service';
 import { Reporte } from './models/reporte.model';
+import { PaginationComponent } from '../../shared/components/pagination/pagination.component';
 
 @Component({
   selector: 'app-reportes',
   standalone: true,
+  imports: [PaginationComponent],
   template: `
     <div class="space-y-6">
       <!-- Header -->
@@ -36,7 +38,7 @@ import { Reporte } from './models/reporte.model';
                 </tr>
               </thead>
               <tbody>
-                @for (reporte of reportes(); track reporte.id) {
+                @for (reporte of paginatedReportes(); track reporte.id) {
                   <tr class="bg-gray-900 border-t border-gray-700 hover:bg-gray-800/70 transition-colors">
                     <td class="px-6 py-4 text-gray-300">{{ reporte.fecha }}</td>
                     <td class="px-6 py-4 text-gray-200 font-medium">{{ reporte.pacienteNombre }}</td>
@@ -63,6 +65,14 @@ import { Reporte } from './models/reporte.model';
             </table>
           </div>
         </div>
+
+        <!-- Paginación -->
+        <app-pagination
+          [currentPage]="currentPage()"
+          [totalItems]="reportes().length"
+          [pageSize]="pageSize"
+          (pageChange)="onPageChange($event)"
+        />
       }
     </div>
   `,
@@ -73,9 +83,21 @@ export class ReportesComponent implements OnInit {
   private readonly router = inject(Router);
 
   readonly reportes = signal<Reporte[]>([]);
+  readonly currentPage = signal(1);
+  readonly pageSize = 5;
+
+  readonly paginatedReportes = computed(() => {
+    const start = (this.currentPage() - 1) * this.pageSize;
+    const end = start + this.pageSize;
+    return this.reportes().slice(start, end);
+  });
 
   ngOnInit(): void {
     this.reportes.set(this.reporteService.listar());
+  }
+
+  onPageChange(page: number): void {
+    this.currentPage.set(page);
   }
 
   verDetalle(id: number): void {

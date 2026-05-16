@@ -1,6 +1,7 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, computed, inject, signal, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { SearchInputComponent } from '../../shared/components/search-input/search-input.component';
+import { PaginationComponent } from '../../shared/components/pagination/pagination.component';
 import { PacienteService } from './services/paciente.service';
 import { Paciente } from './models/paciente.model';
 import { ToastService } from '../../shared/services/toast.service';
@@ -8,7 +9,7 @@ import { ToastService } from '../../shared/services/toast.service';
 @Component({
   selector: 'app-pacientes',
   standalone: true,
-  imports: [SearchInputComponent],
+  imports: [SearchInputComponent, PaginationComponent],
   template: `
     <div class="space-y-6">
       <!-- Header -->
@@ -55,7 +56,7 @@ import { ToastService } from '../../shared/services/toast.service';
                 </tr>
               </thead>
               <tbody>
-                @for (paciente of pacientesFiltrados(); track paciente.id) {
+                @for (paciente of paginatedPacientes(); track paciente.id) {
                   <tr class="bg-gray-900 border-t border-gray-700 hover:bg-gray-800/70 transition-colors">
                     <td class="px-6 py-4 text-gray-200 font-medium">{{ paciente.nombreCompleto }}</td>
                     <td class="px-6 py-4 text-gray-300">{{ paciente.dni }}</td>
@@ -91,6 +92,14 @@ import { ToastService } from '../../shared/services/toast.service';
             </table>
           </div>
         </div>
+
+        <!-- Paginación -->
+        <app-pagination
+          [currentPage]="currentPage()"
+          [totalItems]="pacientesFiltrados().length"
+          [pageSize]="pageSize"
+          (pageChange)="onPageChange($event)"
+        />
       }
     </div>
   `,
@@ -102,6 +111,14 @@ export class PacientesComponent implements OnInit {
   private readonly toast = inject(ToastService);
 
   readonly pacientesFiltrados = signal<Paciente[]>([]);
+  readonly currentPage = signal(1);
+  readonly pageSize = 5;
+
+  readonly paginatedPacientes = computed(() => {
+    const start = (this.currentPage() - 1) * this.pageSize;
+    const end = start + this.pageSize;
+    return this.pacientesFiltrados().slice(start, end);
+  });
 
   ngOnInit(): void {
     this.pacientesFiltrados.set(this.pacienteService.listar());
@@ -109,6 +126,11 @@ export class PacientesComponent implements OnInit {
 
   onBuscar(query: string): void {
     this.pacientesFiltrados.set(this.pacienteService.buscar(query));
+    this.currentPage.set(1);
+  }
+
+  onPageChange(page: number): void {
+    this.currentPage.set(page);
   }
 
   navegarNuevo(): void {
@@ -126,6 +148,7 @@ export class PacientesComponent implements OnInit {
     if (confirmado) {
       this.pacienteService.eliminar(paciente.id);
       this.pacientesFiltrados.set(this.pacienteService.listar());
+      this.currentPage.set(1);
       this.toast.success('Paciente eliminado correctamente');
     }
   }
