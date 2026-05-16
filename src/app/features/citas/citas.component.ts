@@ -1,7 +1,7 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { CitaService } from './services/cita.service';
-import { Cita, EstadoCita, isTransicionValida } from './models/cita.model';
+import { Cita, EstadoCita, Odontologo, isTransicionValida } from './models/cita.model';
 import { ToastService } from '../../shared/services/toast.service';
 import { ConfirmService } from '../../shared/services/confirm.service';
 
@@ -14,7 +14,7 @@ import { ConfirmService } from '../../shared/services/confirm.service';
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 class="text-2xl font-bold text-white">Citas</h1>
-          <p class="text-gray-400 text-sm mt-1">Gestión de citas y agenda de la clínica</p>
+          <p class="text-gray-400 text-sm mt-1">Gestion de citas y agenda de la clinica</p>
         </div>
         <button
           (click)="navegarNueva()"
@@ -27,16 +27,46 @@ import { ConfirmService } from '../../shared/services/confirm.service';
         </button>
       </div>
 
-      <!-- Filtro por fecha -->
-      <div class="flex items-center gap-3">
-        <label for="fechaFiltro" class="text-sm font-medium text-gray-300">Fecha:</label>
-        <input
-          id="fechaFiltro"
-          type="date"
-          [value]="fechaSeleccionada()"
-          (change)="onFechaChange($event)"
-          class="px-4 py-2 rounded-lg bg-gray-800 border border-gray-600 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
-        />
+      <!-- Filtros -->
+      <div class="flex flex-wrap items-center gap-3">
+        <div class="flex items-center gap-2">
+          <label for="fechaFiltro" class="text-sm font-medium text-gray-300">Fecha:</label>
+          <input
+            id="fechaFiltro"
+            type="date"
+            [value]="fechaSeleccionada()"
+            (change)="onFechaChange($event)"
+            class="px-4 py-2 rounded-lg bg-gray-800 border border-gray-600 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+          />
+        </div>
+        <div class="flex items-center gap-2">
+          <label for="odontologoFiltro" class="text-sm font-medium text-gray-300">Odontologo:</label>
+          <select
+            id="odontologoFiltro"
+            [value]="odontologoSeleccionado() ?? ''"
+            (change)="onOdontologoChange($event)"
+            class="px-4 py-2 rounded-lg bg-gray-800 border border-gray-600 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+          >
+            <option value="">Todos</option>
+            @for (odontologo of odontologos(); track odontologo.id) {
+              <option [value]="odontologo.id">{{ odontologo.nombre }}</option>
+            }
+          </select>
+        </div>
+        <div class="flex items-center gap-2">
+          <label for="estadoFiltro" class="text-sm font-medium text-gray-300">Estado:</label>
+          <select
+            id="estadoFiltro"
+            [value]="estadoSeleccionado() ?? ''"
+            (change)="onEstadoChange($event)"
+            class="px-4 py-2 rounded-lg bg-gray-800 border border-gray-600 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+          >
+            <option value="">Todos</option>
+            @for (estado of estados(); track estado) {
+              <option [value]="estado">{{ estado }}</option>
+            }
+          </select>
+        </div>
       </div>
 
       <!-- Tabla -->
@@ -45,7 +75,7 @@ import { ConfirmService } from '../../shared/services/confirm.service';
           <svg class="w-12 h-12 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
           </svg>
-          <p class="text-gray-400 text-sm">No hay citas para esta fecha</p>
+          <p class="text-gray-400 text-sm">No hay citas para los filtros seleccionados</p>
         </div>
       } @else {
         <div class="w-full rounded-xl border border-gray-700 overflow-hidden">
@@ -55,7 +85,7 @@ import { ConfirmService } from '../../shared/services/confirm.service';
                 <tr>
                   <th class="px-6 py-4 font-medium">Hora</th>
                   <th class="px-6 py-4 font-medium">Paciente</th>
-                  <th class="px-6 py-4 font-medium">Odontólogo</th>
+                  <th class="px-6 py-4 font-medium">Odontologo</th>
                   <th class="px-6 py-4 font-medium">Motivo</th>
                   <th class="px-6 py-4 font-medium text-center">Estado</th>
                   <th class="px-6 py-4 font-medium text-center">Acciones</th>
@@ -131,7 +161,17 @@ export class CitasComponent implements OnInit {
   private readonly confirmService = inject(ConfirmService);
 
   readonly fechaSeleccionada = signal(new Date().toISOString().split('T')[0]);
+  readonly odontologoSeleccionado = signal<number | null>(null);
+  readonly estadoSeleccionado = signal<string | null>(null);
   readonly citasFiltradas = signal<Cita[]>([]);
+
+  readonly odontologos = computed<Odontologo[]>(() => this.citaService.listarOdontologos());
+  readonly estados = computed<string[]>(() => [
+    EstadoCita.PENDIENTE,
+    EstadoCita.ATENDIDO,
+    EstadoCita.CANCELADO,
+    EstadoCita.REAGENDADO
+  ]);
 
   ngOnInit(): void {
     this.cargarCitas();
@@ -140,6 +180,20 @@ export class CitasComponent implements OnInit {
   onFechaChange(event: Event): void {
     const input = event.target as HTMLInputElement;
     this.fechaSeleccionada.set(input.value);
+    this.cargarCitas();
+  }
+
+  onOdontologoChange(event: Event): void {
+    const select = event.target as HTMLSelectElement;
+    const value = select.value;
+    this.odontologoSeleccionado.set(value ? Number(value) : null);
+    this.cargarCitas();
+  }
+
+  onEstadoChange(event: Event): void {
+    const select = event.target as HTMLSelectElement;
+    const value = select.value;
+    this.estadoSeleccionado.set(value || null);
     this.cargarCitas();
   }
 
@@ -154,7 +208,7 @@ export class CitasComponent implements OnInit {
   async onAtender(cita: Cita): Promise<void> {
     const confirmado = await this.confirmService.confirm({
       title: 'Atender Cita',
-      message: `¿Marcar como atendida la cita de "${cita.pacienteNombre}" a las ${cita.hora}?`,
+      message: `Marcar como atendida la cita de "${cita.pacienteNombre}" a las ${cita.hora}?`,
       confirmText: 'Atender',
       type: 'info'
     });
@@ -168,7 +222,7 @@ export class CitasComponent implements OnInit {
   async onCancelar(cita: Cita): Promise<void> {
     const confirmado = await this.confirmService.confirm({
       title: 'Cancelar Cita',
-      message: `¿Está seguro de cancelar la cita de "${cita.pacienteNombre}" a las ${cita.hora}?`,
+      message: `Esta seguro de cancelar la cita de "${cita.pacienteNombre}" a las ${cita.hora}?`,
       confirmText: 'Cancelar Cita',
       type: 'danger'
     });
@@ -208,6 +262,10 @@ export class CitasComponent implements OnInit {
   }
 
   private cargarCitas(): void {
-    this.citasFiltradas.set(this.citaService.listarPorFecha(this.fechaSeleccionada()));
+    const odontologoId = this.odontologoSeleccionado() ?? undefined;
+    const estado = this.estadoSeleccionado() ?? undefined;
+    this.citasFiltradas.set(
+      this.citaService.listarConFiltros(this.fechaSeleccionada(), odontologoId, estado)
+    );
   }
 }
