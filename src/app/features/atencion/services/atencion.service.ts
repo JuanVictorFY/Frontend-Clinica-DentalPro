@@ -12,6 +12,7 @@ export class AtencionService {
     {
       id: 1,
       citaId: 3,
+      pacienteId: 3,
       pacienteNombre: 'Ana Lucía Fernández Torres',
       odontologoNombre: 'Dr. Carlos Mendoza',
       diagnostico: 'Tercera molar impactada con inflamación pericoronaria',
@@ -22,6 +23,7 @@ export class AtencionService {
     {
       id: 2,
       citaId: 99,
+      pacienteId: 10,
       pacienteNombre: 'Fernando Daniel Castillo Rojas',
       odontologoNombre: 'Dra. Sofía Castro',
       diagnostico: 'Caries dental en premolar superior izquierdo',
@@ -45,6 +47,7 @@ export class AtencionService {
     const nueva: NotaClinica = {
       id: this.nextId++,
       citaId: request.citaId,
+      pacienteId: cita?.pacienteId ?? 0,
       pacienteNombre: cita?.pacienteNombre ?? 'Paciente desconocido',
       odontologoNombre: cita?.odontologoNombre ?? 'Odontólogo desconocido',
       diagnostico: request.diagnostico,
@@ -57,6 +60,11 @@ export class AtencionService {
 
     // Cambiar estado de la cita a ATENDIDO
     this.citaService.atender(request.citaId);
+  }
+
+  /** Retorna las notas clínicas de un paciente específico */
+  listarPorPaciente(pacienteId: number): NotaClinica[] {
+    return this.notasClinicas().filter(n => n.pacienteId === pacienteId);
   }
 
   /** Obtiene una nota clínica por el ID de la cita */

@@ -1,6 +1,7 @@
 export interface NotaClinica {
   id: number;
   citaId: number;
+  pacienteId: number;
   pacienteNombre: string;
   odontologoNombre: string;
   diagnostico: string;
