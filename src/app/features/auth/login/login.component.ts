@@ -154,7 +154,7 @@ import { UserRole } from '../../../core/models/user.model';
                   <input type="checkbox" class="w-4 h-4 rounded border-gray-600 bg-gray-800 text-blue-600 focus:ring-blue-500 focus:ring-offset-0">
                   <span class="text-sm text-gray-400">Mantener sesión</span>
                 </label>
-                <a href="javascript:void(0)" class="text-sm text-blue-400 hover:text-blue-300 transition-colors">
+                <a routerLink="/recuperar-contrasena" class="text-sm text-blue-400 hover:text-blue-300 transition-colors">
                   ¿Olvidaste tu contraseña?
                 </a>
               </div>
