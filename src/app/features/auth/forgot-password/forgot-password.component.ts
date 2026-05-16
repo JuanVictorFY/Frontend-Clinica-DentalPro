@@ -7,8 +7,17 @@ import { Router, RouterLink } from '@angular/router';
   standalone: true,
   imports: [ReactiveFormsModule, RouterLink],
   template: `
-    <div class="min-h-screen flex items-center justify-center bg-gray-950 px-4 py-12">
-      <div class="w-full max-w-md">
+    <div class="min-h-screen flex items-center justify-center bg-gray-950 px-4 py-12 relative overflow-hidden">
+      <!-- Background decorations -->
+      <div class="absolute inset-0 pointer-events-none">
+        <div class="absolute top-0 left-1/4 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl animate-scale-pulse"></div>
+        <div class="absolute bottom-0 right-1/4 w-80 h-80 bg-cyan-600/10 rounded-full blur-3xl animate-scale-pulse" style="animation-delay: 2s;"></div>
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-blue-900/5 rounded-full blur-3xl"></div>
+      </div>
+      <!-- Grid pattern overlay -->
+      <div class="absolute inset-0 opacity-[0.03]" style="background-image: radial-gradient(circle, #3b82f6 1px, transparent 1px); background-size: 40px 40px;"></div>
+
+      <div class="w-full max-w-md relative z-10">
         <!-- Card -->
         <div class="bg-gray-900/60 border border-gray-800/80 rounded-3xl p-8 md:p-10 backdrop-blur-sm">
           <!-- Logo -->
