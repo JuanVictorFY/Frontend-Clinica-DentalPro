@@ -5,6 +5,7 @@ import { Usuario } from './models/usuario.model';
 import { UserRole } from '../../core/models/user.model';
 import { ToastService } from '../../shared/services/toast.service';
 import { PaginationComponent } from '../../shared/components/pagination/pagination.component';
+import { ConfirmService } from '../../shared/services/confirm.service';
 
 @Component({
   selector: 'app-usuarios',
@@ -118,6 +119,7 @@ export class UsuariosComponent implements OnInit {
   private readonly usuarioService = inject(UsuarioService);
   private readonly router = inject(Router);
   private readonly toast = inject(ToastService);
+  private readonly confirmService = inject(ConfirmService);
 
   readonly usuarios = signal<Usuario[]>([]);
   readonly currentPage = signal(1);
@@ -159,10 +161,13 @@ export class UsuariosComponent implements OnInit {
     this.router.navigate(['/intranet/usuarios/editar', id]);
   }
 
-  onEliminar(usuario: Usuario): void {
-    const confirmado = window.confirm(
-      `¿Está seguro de eliminar al usuario "${usuario.nombreCompleto}"?`
-    );
+  async onEliminar(usuario: Usuario): Promise<void> {
+    const confirmado = await this.confirmService.confirm({
+      title: 'Eliminar Usuario',
+      message: `¿Está seguro de eliminar al usuario "${usuario.nombreCompleto}"? Esta acción no se puede deshacer.`,
+      confirmText: 'Eliminar',
+      type: 'danger'
+    });
     if (confirmado) {
       this.usuarioService.eliminar(usuario.id);
       this.usuarios.set(this.usuarioService.listar());
