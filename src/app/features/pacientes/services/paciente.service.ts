@@ -131,4 +131,9 @@ export class PacienteService {
   eliminar(id: number): void {
     this.pacientes.update(list => list.filter(p => p.id !== id));
   }
+
+  /** Verifica si un DNI ya existe (excluye un ID específico para modo edición) */
+  existeDni(dni: string, excludeId?: number): boolean {
+    return this.pacientes().some(p => p.dni === dni && p.id !== excludeId);
+  }
 }
