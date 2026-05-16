@@ -194,4 +194,21 @@ export class CitaService {
       })
     );
   }
+
+  /** Retorna todas las citas de un paciente específico, ordenadas por fecha descendente */
+  listarPorPaciente(pacienteId: number): Cita[] {
+    return this.citas()
+      .filter(c => c.pacienteId === pacienteId)
+      .sort((a, b) => b.fecha.localeCompare(a.fecha) || b.hora.localeCompare(a.hora));
+  }
+
+  /** Filtra citas por fecha, odontólogo y estado (lógica AND) */
+  listarConFiltros(fecha: string, odontologoId?: number, estado?: string): Cita[] {
+    return this.citas().filter(c => {
+      if (c.fecha !== fecha) return false;
+      if (odontologoId && c.odontologoId !== odontologoId) return false;
+      if (estado && c.estado !== estado) return false;
+      return true;
+    });
+  }
 }

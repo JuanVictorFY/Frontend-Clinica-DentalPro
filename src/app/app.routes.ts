@@ -49,6 +49,11 @@ export const routes: Routes = [
               import('./features/pacientes/components/paciente-form.component').then(m => m.PacienteFormComponent),
           },
           {
+            path: ':id',
+            loadComponent: () =>
+              import('./features/pacientes/components/paciente-detalle.component').then(m => m.PacienteDetalleComponent),
+          },
+          {
             path: 'editar/:id',
             loadComponent: () =>
               import('./features/pacientes/components/paciente-form.component').then(m => m.PacienteFormComponent),
