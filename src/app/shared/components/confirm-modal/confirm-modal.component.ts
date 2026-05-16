@@ -8,12 +8,12 @@ import { ConfirmService } from '../../services/confirm.service';
     @if (confirmService.isOpen()) {
       <!-- Backdrop -->
       <div
-        class="fixed inset-0 z-[90] bg-black/60 animate-fade-in"
+        class="fixed inset-0 z-90 bg-black/60 animate-fade-in"
         (click)="confirmService.onCancel()"
       ></div>
 
       <!-- Modal -->
-      <div class="fixed inset-0 z-[91] flex items-center justify-center p-4">
+      <div class="fixed inset-0 z-91 flex items-center justify-center p-4">
         <div class="w-full max-w-md bg-gray-800 border border-gray-700 rounded-2xl p-6 animate-scale-in">
           <!-- Icon -->
           <div class="flex justify-center mb-4">
