@@ -2,6 +2,7 @@ import { Component, computed, inject, signal, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { SearchInputComponent } from '../../shared/components/search-input/search-input.component';
 import { PaginationComponent } from '../../shared/components/pagination/pagination.component';
+import { TableSkeletonComponent } from '../../shared/components/table-skeleton/table-skeleton.component';
 import { PacienteService } from './services/paciente.service';
 import { Paciente } from './models/paciente.model';
 import { ToastService } from '../../shared/services/toast.service';
@@ -10,7 +11,7 @@ import { ConfirmService } from '../../shared/services/confirm.service';
 @Component({
   selector: 'app-pacientes',
   standalone: true,
-  imports: [SearchInputComponent, PaginationComponent],
+  imports: [SearchInputComponent, PaginationComponent, TableSkeletonComponent],
   template: `
     <div class="space-y-6">
       <!-- Header -->
@@ -35,8 +36,10 @@ import { ConfirmService } from '../../shared/services/confirm.service';
         <app-search-input (searchChange)="onBuscar($event)" />
       </div>
 
-      <!-- Tabla -->
-      @if (pacientesFiltrados().length === 0) {
+      <!-- Skeleton de carga -->
+      @if (isLoading()) {
+        <app-table-skeleton [columns]="5" [rows]="5" />
+      } @else if (pacientesFiltrados().length === 0) {
         <div class="w-full rounded-xl border border-gray-700 bg-gray-900 p-8 flex flex-col items-center justify-center gap-3">
           <svg class="w-12 h-12 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
@@ -122,6 +125,7 @@ export class PacientesComponent implements OnInit {
   private readonly toast = inject(ToastService);
   private readonly confirmService = inject(ConfirmService);
 
+  readonly isLoading = signal(true);
   readonly pacientesFiltrados = signal<Paciente[]>([]);
   readonly currentPage = signal(1);
   readonly pageSize = 5;
@@ -133,7 +137,11 @@ export class PacientesComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    this.pacientesFiltrados.set(this.pacienteService.listar());
+    // Simular carga desde API
+    setTimeout(() => {
+      this.pacientesFiltrados.set(this.pacienteService.listar());
+      this.isLoading.set(false);
+    }, 600);
   }
 
   onBuscar(query: string): void {

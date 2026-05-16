@@ -5,12 +5,13 @@ import { Usuario } from './models/usuario.model';
 import { UserRole } from '../../core/models/user.model';
 import { ToastService } from '../../shared/services/toast.service';
 import { PaginationComponent } from '../../shared/components/pagination/pagination.component';
+import { TableSkeletonComponent } from '../../shared/components/table-skeleton/table-skeleton.component';
 import { ConfirmService } from '../../shared/services/confirm.service';
 
 @Component({
   selector: 'app-usuarios',
   standalone: true,
-  imports: [PaginationComponent],
+  imports: [PaginationComponent, TableSkeletonComponent],
   template: `
     <div class="space-y-6">
       <!-- Header -->
@@ -30,8 +31,10 @@ import { ConfirmService } from '../../shared/services/confirm.service';
         </button>
       </div>
 
-      <!-- Tabla -->
-      @if (usuarios().length === 0) {
+      <!-- Skeleton de carga -->
+      @if (isLoading()) {
+        <app-table-skeleton [columns]="5" [rows]="5" />
+      } @else if (usuarios().length === 0) {
         <div class="w-full rounded-xl border border-gray-700 bg-gray-900 p-8 flex flex-col items-center justify-center gap-3">
           <svg class="w-12 h-12 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" />
@@ -121,6 +124,7 @@ export class UsuariosComponent implements OnInit {
   private readonly toast = inject(ToastService);
   private readonly confirmService = inject(ConfirmService);
 
+  readonly isLoading = signal(true);
   readonly usuarios = signal<Usuario[]>([]);
   readonly currentPage = signal(1);
   readonly pageSize = 5;
@@ -132,7 +136,11 @@ export class UsuariosComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    this.usuarios.set(this.usuarioService.listar());
+    // Simular carga desde API
+    setTimeout(() => {
+      this.usuarios.set(this.usuarioService.listar());
+      this.isLoading.set(false);
+    }, 600);
   }
 
   onPageChange(page: number): void {
