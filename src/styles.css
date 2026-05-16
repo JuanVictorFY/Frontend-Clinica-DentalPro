@@ -1,7 +1,42 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 html {
   scroll-behavior: smooth;
+}
+
+/* === Theme Variables === */
+:root, .light {
+  --intranet-bg: #f8fafc;
+  --intranet-surface: #ffffff;
+  --intranet-surface-2: #f1f5f9;
+  --intranet-border: #e2e8f0;
+  --intranet-text: #1e293b;
+  --intranet-text-secondary: #64748b;
+  --intranet-text-muted: #94a3b8;
+  --intranet-sidebar-bg: #ffffff;
+  --intranet-header-bg: rgba(255, 255, 255, 0.85);
+  --intranet-input-bg: #f1f5f9;
+  --intranet-hover: #f1f5f9;
+  --intranet-table-header: #f8fafc;
+  --intranet-table-row-hover: #f1f5f9;
+}
+
+.dark {
+  --intranet-bg: #030712;
+  --intranet-surface: #111827;
+  --intranet-surface-2: #1f2937;
+  --intranet-border: #374151;
+  --intranet-text: #f9fafb;
+  --intranet-text-secondary: #9ca3af;
+  --intranet-text-muted: #6b7280;
+  --intranet-sidebar-bg: #111827;
+  --intranet-header-bg: rgba(17, 24, 39, 0.85);
+  --intranet-input-bg: #1f2937;
+  --intranet-hover: #1f2937;
+  --intranet-table-header: #1f2937;
+  --intranet-table-row-hover: rgba(31, 41, 55, 0.7);
 }
 
 /* === Custom Animations === */
@@ -69,4 +104,36 @@ html {
 [data-animate].animated {
   opacity: 1;
   transform: translateY(0);
+}
+
+
+/* === Intranet Theme Classes === */
+.intranet-bg { background-color: var(--intranet-bg); }
+.intranet-surface { background-color: var(--intranet-surface); }
+.intranet-surface-2 { background-color: var(--intranet-surface-2); }
+.intranet-border { border-color: var(--intranet-border); }
+.intranet-text { color: var(--intranet-text); }
+.intranet-text-secondary { color: var(--intranet-text-secondary); }
+.intranet-text-muted { color: var(--intranet-text-muted); }
+.intranet-sidebar { background-color: var(--intranet-sidebar-bg); }
+.intranet-header { background-color: var(--intranet-header-bg); }
+.intranet-input { background-color: var(--intranet-input-bg); }
+.intranet-hover:hover { background-color: var(--intranet-hover); }
+.intranet-table-header { background-color: var(--intranet-table-header); }
+
+
+/* === Page Transition Animation === */
+@keyframes pageEnter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-page-enter {
+  animation: pageEnter 0.3s ease-out forwards;
 }
