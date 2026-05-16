@@ -27,7 +27,12 @@ export const routes: Routes = [
       import('./layouts/intranet-layout/intranet-layout.component').then(m => m.IntranetLayoutComponent),
     canActivate: [authGuard],
     children: [
-      { path: '', redirectTo: 'pacientes', pathMatch: 'full' },
+      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+      {
+        path: 'dashboard',
+        loadComponent: () =>
+          import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent),
+      },
       {
         path: 'pacientes',
         canActivate: [roleGuard],
