@@ -15,7 +15,7 @@ import { ToastService, ToastType } from '../../services/toast.service';
           [class.border-blue-500]="toast.type === 'info'"
         >
           <!-- Icono -->
-          <div class="flex-shrink-0 mt-0.5">
+          <div class="shrink-0 mt-0.5">
             @switch (toast.type) {
               @case ('success') {
                 <svg class="w-5 h-5 text-green-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
