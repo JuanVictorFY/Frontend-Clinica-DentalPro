@@ -22,3 +22,4 @@ export class PagoService {
     return this.http.patch<Pago>(`${API}/pagos/${id}/estado`, { estado });
   }
 }
+
