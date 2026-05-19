@@ -34,3 +34,4 @@ export class ReporteService {
     return this.http.get(`${API}/reportes/${id}/pdf`, { responseType: 'blob' });
   }
 }
+
