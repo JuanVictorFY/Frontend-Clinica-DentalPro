@@ -8,3 +8,4 @@ export interface Reporte {
   observaciones: string;
   fecha: string;
 }
+
