@@ -12,3 +12,4 @@ export interface TratamientoRequest {
   precio: number;
   duracionMinutos: number;
 }
+
