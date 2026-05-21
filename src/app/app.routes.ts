@@ -24,6 +24,11 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./features/auth/forgot-password/forgot-password.component').then(m => m.ForgotPasswordComponent),
   },
+  {
+    path: 'registro-paciente',
+    loadComponent: () =>
+      import('./features/auth/registro-paciente/registro-paciente.component').then(m => m.RegistroPacienteComponent),
+  },
 
   // Rutas de la intranet (protegidas)
   {
@@ -41,7 +46,7 @@ export const routes: Routes = [
       {
         path: 'pacientes',
         canActivate: [roleGuard],
-        data: { roles: [UserRole.ADMIN, UserRole.RECEPCIONISTA] },
+        data: { roles: [UserRole.ADMINISTRADOR, UserRole.RECEPCIONISTA] },
         children: [
           {
             path: '',
@@ -68,7 +73,7 @@ export const routes: Routes = [
       {
         path: 'citas',
         canActivate: [roleGuard],
-        data: { roles: [UserRole.ADMIN, UserRole.RECEPCIONISTA, UserRole.ODONTOLOGO] },
+        data: { roles: [UserRole.ADMINISTRADOR, UserRole.RECEPCIONISTA, UserRole.ODONTOLOGO] },
         children: [
           {
             path: '',
@@ -90,7 +95,7 @@ export const routes: Routes = [
       {
         path: 'atencion',
         canActivate: [roleGuard],
-        data: { roles: [UserRole.ADMIN, UserRole.ODONTOLOGO] },
+        data: { roles: [UserRole.ADMINISTRADOR, UserRole.ODONTOLOGO] },
         children: [
           {
             path: '',
@@ -107,7 +112,7 @@ export const routes: Routes = [
       {
         path: 'usuarios',
         canActivate: [roleGuard],
-        data: { roles: [UserRole.ADMIN] },
+        data: { roles: [UserRole.ADMINISTRADOR] },
         children: [
           {
             path: '',
@@ -129,7 +134,7 @@ export const routes: Routes = [
       {
         path: 'reportes',
         canActivate: [roleGuard],
-        data: { roles: [UserRole.ADMIN, UserRole.ODONTOLOGO] },
+        data: { roles: [UserRole.ADMINISTRADOR, UserRole.ODONTOLOGO] },
         children: [
           {
             path: '',

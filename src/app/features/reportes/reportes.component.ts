@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { ReporteService } from './services/reporte.service';
 import { Reporte } from './models/reporte.model';
@@ -41,7 +41,7 @@ import { TableSkeletonComponent } from '../../shared/components/table-skeleton/t
                 </tr>
               </thead>
               <tbody>
-                @for (reporte of paginatedReportes(); track reporte.id) {
+                @for (reporte of reportes(); track reporte.id) {
                   <tr class="bg-gray-900 border-t border-gray-700 hover:bg-gray-800/70 transition-colors">
                     <td class="px-6 py-4 text-gray-300">{{ reporte.fecha }}</td>
                     <td class="px-6 py-4 text-gray-200 font-medium">{{ reporte.pacienteNombre }}</td>
@@ -72,7 +72,7 @@ import { TableSkeletonComponent } from '../../shared/components/table-skeleton/t
         <!-- Paginación -->
         <app-pagination
           [currentPage]="currentPage()"
-          [totalItems]="reportes().length"
+          [totalItems]="totalElements()"
           [pageSize]="pageSize"
           (pageChange)="onPageChange($event)"
         />
@@ -88,27 +88,31 @@ export class ReportesComponent implements OnInit {
   readonly isLoading = signal(true);
   readonly reportes = signal<Reporte[]>([]);
   readonly currentPage = signal(1);
+  readonly totalElements = signal(0);
   readonly pageSize = 5;
 
-  readonly paginatedReportes = computed(() => {
-    const start = (this.currentPage() - 1) * this.pageSize;
-    const end = start + this.pageSize;
-    return this.reportes().slice(start, end);
-  });
-
   ngOnInit(): void {
-    // Simular carga desde API
-    setTimeout(() => {
-      this.reportes.set(this.reporteService.listar());
-      this.isLoading.set(false);
-    }, 600);
+    this.cargarReportes();
   }
 
   onPageChange(page: number): void {
     this.currentPage.set(page);
+    this.cargarReportes();
   }
 
   verDetalle(id: number): void {
     this.router.navigate(['/intranet/reportes', id]);
+  }
+
+  private cargarReportes(): void {
+    this.isLoading.set(true);
+    this.reporteService.listar(this.currentPage(), this.pageSize).subscribe({
+      next: (result) => {
+        this.reportes.set(result.content);
+        this.totalElements.set(result.totalElements);
+        this.isLoading.set(false);
+      },
+      error: () => this.isLoading.set(false)
+    });
   }
 }

@@ -6,11 +6,12 @@ import { Navbar } from './components/navbar/navbar';
 import { Footer } from './components/footer/footer';
 import { ToastContainerComponent } from './shared/components/toast-container/toast-container.component';
 import { ConfirmModalComponent } from './shared/components/confirm-modal/confirm-modal.component';
+import { AuthModalsComponent } from './shared/components/auth-modals/auth-modals.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, Navbar, Footer, ToastContainerComponent, ConfirmModalComponent],
+  imports: [RouterOutlet, Navbar, Footer, ToastContainerComponent, ConfirmModalComponent, AuthModalsComponent],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
@@ -29,6 +30,9 @@ export class App {
   /** Ocultar navbar y footer en rutas de intranet y login */
   readonly showPublicLayout = computed(() => {
     const url = this.currentUrl();
-    return !url.startsWith('/intranet') && !url.startsWith('/login');
+    return !url.startsWith('/intranet')
+      && !url.startsWith('/login')
+      && !url.startsWith('/registro-paciente')
+      && !url.startsWith('/recuperar-contrasena');
   });
 }

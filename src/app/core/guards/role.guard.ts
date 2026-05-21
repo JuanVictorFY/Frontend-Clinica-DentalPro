@@ -16,7 +16,7 @@ export const roleGuard: CanActivateFn = (route: ActivatedRouteSnapshot) => {
   }
 
   // ADMIN always has full access
-  if (userRole === UserRole.ADMIN) {
+  if (userRole === UserRole.ADMINISTRADOR) {
     return true;
   }
 

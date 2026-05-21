@@ -1,7 +1,8 @@
 export enum UserRole {
-  ADMIN = 'ADMIN',
+  ADMINISTRADOR = 'ADMINISTRADOR',
   RECEPCIONISTA = 'RECEPCIONISTA',
-  ODONTOLOGO = 'ODONTOLOGO'
+  ODONTOLOGO = 'ODONTOLOGO',
+  PACIENTE = 'PACIENTE'
 }
 
 export interface UserProfile {
@@ -13,7 +14,8 @@ export interface UserProfile {
 
 export interface TokenPayload {
   sub: string;
-  rol: UserRole;
+  rol: string;
+  userId: number;
   exp: number;
   iat: number;
 }

@@ -39,7 +39,7 @@ import { ConfirmService } from '../../shared/services/confirm.service';
       <!-- Skeleton de carga -->
       @if (isLoading()) {
         <app-table-skeleton [columns]="5" [rows]="5" />
-      } @else if (pacientesFiltrados().length === 0) {
+      } @else if (displayedPacientes().length === 0) {
         <div class="w-full rounded-xl border border-gray-700 bg-gray-900 p-8 flex flex-col items-center justify-center gap-3">
           <svg class="w-12 h-12 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
@@ -60,7 +60,7 @@ import { ConfirmService } from '../../shared/services/confirm.service';
                 </tr>
               </thead>
               <tbody>
-                @for (paciente of paginatedPacientes(); track paciente.id) {
+                @for (paciente of displayedPacientes(); track paciente.id) {
                   <tr class="bg-gray-900 border-t border-gray-700 hover:bg-gray-800/70 transition-colors">
                     <td class="px-6 py-4 text-gray-200 font-medium">{{ paciente.nombreCompleto }}</td>
                     <td class="px-6 py-4 text-gray-300">{{ paciente.dni }}</td>
@@ -68,7 +68,6 @@ import { ConfirmService } from '../../shared/services/confirm.service';
                     <td class="px-6 py-4 text-gray-300">{{ paciente.email }}</td>
                     <td class="px-6 py-4">
                       <div class="flex items-center justify-center gap-2">
-                        <!-- Ver historial -->
                         <button
                           (click)="navegarHistorial(paciente.id)"
                           class="p-2 rounded-lg text-emerald-400 hover:bg-emerald-500/10 transition-colors cursor-pointer"
@@ -78,7 +77,6 @@ import { ConfirmService } from '../../shared/services/confirm.service';
                             <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
                           </svg>
                         </button>
-                        <!-- Editar -->
                         <button
                           (click)="navegarEditar(paciente.id)"
                           class="p-2 rounded-lg text-blue-400 hover:bg-blue-500/10 transition-colors cursor-pointer"
@@ -88,7 +86,6 @@ import { ConfirmService } from '../../shared/services/confirm.service';
                             <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
                           </svg>
                         </button>
-                        <!-- Eliminar -->
                         <button
                           (click)="onEliminar(paciente)"
                           class="p-2 rounded-lg text-red-400 hover:bg-red-500/10 transition-colors cursor-pointer"
@@ -110,7 +107,7 @@ import { ConfirmService } from '../../shared/services/confirm.service';
         <!-- Paginación -->
         <app-pagination
           [currentPage]="currentPage()"
-          [totalItems]="pacientesFiltrados().length"
+          [totalItems]="totalElements()"
           [pageSize]="pageSize"
           (pageChange)="onPageChange($event)"
         />
@@ -126,31 +123,49 @@ export class PacientesComponent implements OnInit {
   private readonly confirmService = inject(ConfirmService);
 
   readonly isLoading = signal(true);
-  readonly pacientesFiltrados = signal<Paciente[]>([]);
   readonly currentPage = signal(1);
   readonly pageSize = 5;
+  readonly totalElements = signal(0);
 
-  readonly paginatedPacientes = computed(() => {
-    const start = (this.currentPage() - 1) * this.pageSize;
-    const end = start + this.pageSize;
-    return this.pacientesFiltrados().slice(start, end);
+  private readonly pacientesFiltrados = signal<Paciente[]>([]);
+  private readonly isSearchMode = signal(false);
+
+  readonly displayedPacientes = computed(() => {
+    if (this.isSearchMode()) {
+      const start = (this.currentPage() - 1) * this.pageSize;
+      return this.pacientesFiltrados().slice(start, start + this.pageSize);
+    }
+    return this.pacientesFiltrados();
   });
 
   ngOnInit(): void {
-    // Simular carga desde API
-    setTimeout(() => {
-      this.pacientesFiltrados.set(this.pacienteService.listar());
-      this.isLoading.set(false);
-    }, 600);
+    this.cargarPacientes();
   }
 
   onBuscar(query: string): void {
-    this.pacientesFiltrados.set(this.pacienteService.buscar(query));
     this.currentPage.set(1);
+    if (!query.trim()) {
+      this.isSearchMode.set(false);
+      this.cargarPacientes();
+      return;
+    }
+    this.isSearchMode.set(true);
+    this.isLoading.set(true);
+    this.pacienteService.buscar(query).subscribe({
+      next: (result) => {
+        this.pacientesFiltrados.set(result);
+        this.totalElements.set(result.length);
+        this.isLoading.set(false);
+      },
+      error: () => this.isLoading.set(false)
+    });
   }
 
   onPageChange(page: number): void {
     this.currentPage.set(page);
+    if (!this.isSearchMode()) {
+      this.cargarPacientes();
+    }
   }
 
   navegarNuevo(): void {
@@ -173,10 +188,26 @@ export class PacientesComponent implements OnInit {
       type: 'danger'
     });
     if (confirmado) {
-      this.pacienteService.eliminar(paciente.id);
-      this.pacientesFiltrados.set(this.pacienteService.listar());
-      this.currentPage.set(1);
-      this.toast.success('Paciente eliminado correctamente');
+      this.pacienteService.eliminar(paciente.id).subscribe({
+        next: () => {
+          this.toast.success('Paciente eliminado correctamente');
+          this.currentPage.set(1);
+          this.cargarPacientes();
+        },
+        error: () => this.toast.error('Error al eliminar el paciente')
+      });
     }
+  }
+
+  private cargarPacientes(): void {
+    this.isLoading.set(true);
+    this.pacienteService.listar(this.currentPage(), this.pageSize).subscribe({
+      next: (result) => {
+        this.pacientesFiltrados.set(result.content);
+        this.totalElements.set(result.totalElements);
+        this.isLoading.set(false);
+      },
+      error: () => this.isLoading.set(false)
+    });
   }
 }

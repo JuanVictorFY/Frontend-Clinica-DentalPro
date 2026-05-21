@@ -45,7 +45,7 @@ describe('authGuard', () => {
     const header = btoa(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));
     const payload = btoa(JSON.stringify({
       sub: 'admin@dental.com',
-      rol: UserRole.ADMIN,
+      rol: UserRole.ADMINISTRADOR,
       iat: 1000,
       exp: 1001
     }));

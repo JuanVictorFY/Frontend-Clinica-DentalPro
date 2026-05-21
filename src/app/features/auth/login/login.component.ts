@@ -177,14 +177,50 @@ import { UserRole } from '../../../core/models/user.model';
               </button>
             </form>
 
+            <!-- Register patient link -->
+            <div class="mt-5 text-center text-sm text-gray-500">
+              ¿Eres paciente nuevo?
+              <a routerLink="/registro-paciente" class="text-blue-400 hover:text-blue-300 font-medium ml-1 transition-colors">
+                Regístrate aquí
+              </a>
+            </div>
+
             <!-- Back to website link -->
-            <div class="mt-6 text-center">
+            <div class="mt-3 text-center">
               <a routerLink="/" class="text-sm text-gray-500 hover:text-gray-300 transition-colors inline-flex items-center gap-1">
                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/>
                 </svg>
                 Volver a la web principal
               </a>
+            </div>
+          </div>
+
+          <!-- Acceso rápido admin fijo -->
+          <div class="mt-4 bg-gray-900/40 border border-gray-800/60 rounded-2xl p-4">
+            <p class="text-xs text-gray-500 text-center mb-3 font-medium uppercase tracking-wider">Acceso rápido (demo)</p>
+            <div class="flex flex-col gap-2">
+              @for (cred of credenciales; track cred.label) {
+                <button
+                  type="button"
+                  (click)="rellenarCredenciales(cred.email, cred.password)"
+                  class="flex items-center justify-between px-3 py-2 rounded-lg border border-gray-700/60 hover:border-gray-600 hover:bg-gray-800/50 transition-all group"
+                >
+                  <div class="flex items-center gap-2.5">
+                    <div class="w-7 h-7 rounded-full flex items-center justify-center shrink-0"
+                         [class]="cred.color">
+                      <span class="text-xs font-bold">{{ cred.inicial }}</span>
+                    </div>
+                    <div class="text-left">
+                      <p class="text-xs font-semibold text-gray-300">{{ cred.label }}</p>
+                      <p class="text-xs text-gray-500">{{ cred.email }}</p>
+                    </div>
+                  </div>
+                  <svg class="w-4 h-4 text-gray-600 group-hover:text-gray-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/>
+                  </svg>
+                </button>
+              }
             </div>
           </div>
 
@@ -211,6 +247,12 @@ export class LoginComponent {
   readonly errorMessage = signal('');
   readonly showPassword = signal(false);
 
+  readonly credenciales = [
+    { label: 'Administrador', email: 'admin@dental.com', password: '123456', inicial: 'A', color: 'bg-blue-500/20 text-blue-400' },
+    { label: 'Recepcionista', email: 'recepcion@dental.com', password: '123456', inicial: 'R', color: 'bg-purple-500/20 text-purple-400' },
+    { label: 'Odontólogo', email: 'doctor@dental.com', password: '123456', inicial: 'O', color: 'bg-green-500/20 text-green-400' },
+  ];
+
   loginForm: FormGroup = this.fb.group({
     email: ['', [Validators.required]],
     password: ['', [Validators.required]]
@@ -218,6 +260,11 @@ export class LoginComponent {
 
   togglePassword(): void {
     this.showPassword.update(v => !v);
+  }
+
+  rellenarCredenciales(email: string, password: string): void {
+    this.loginForm.patchValue({ email, password });
+    this.errorMessage.set('');
   }
 
   onSubmit(): void {
@@ -228,29 +275,28 @@ export class LoginComponent {
 
     const { email, password } = this.loginForm.value;
 
-    // Simulate async delay for UX
-    setTimeout(() => {
-      const result = this.authService.login(email, password);
-
-      if (result.success) {
-        const role = this.authService.getUserRole();
-
-        // Navigate based on role
-        switch (role) {
+    this.authService.login(email, password).subscribe({
+      next: (user) => {
+        this.isLoading.set(false);
+        switch (user.rol) {
           case UserRole.ODONTOLOGO:
             this.router.navigate(['/intranet/citas']);
             break;
           case UserRole.RECEPCIONISTA:
             this.router.navigate(['/intranet/pacientes']);
             break;
+          case UserRole.PACIENTE:
+            this.router.navigate(['/']);
+            break;
           default:
             this.router.navigate(['/intranet']);
             break;
         }
-      } else {
-        this.errorMessage.set(result.error || 'Error al iniciar sesión.');
+      },
+      error: () => {
+        this.errorMessage.set('Credenciales inválidas. Verifica tu correo y contraseña.');
         this.isLoading.set(false);
       }
-    }, 800);
+    });
   }
 }

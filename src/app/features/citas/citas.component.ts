@@ -5,6 +5,8 @@ import { Cita, EstadoCita, Odontologo, isTransicionValida } from './models/cita.
 import { ToastService } from '../../shared/services/toast.service';
 import { ConfirmService } from '../../shared/services/confirm.service';
 import { TableSkeletonComponent } from '../../shared/components/table-skeleton/table-skeleton.component';
+import { AuthService } from '../../core/services/auth.service';
+import { UserRole } from '../../core/models/user.model';
 
 @Component({
   selector: 'app-citas',
@@ -15,18 +17,24 @@ import { TableSkeletonComponent } from '../../shared/components/table-skeleton/t
       <!-- Header -->
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 class="text-2xl font-bold text-white">Citas</h1>
-          <p class="text-gray-400 text-sm mt-1">Gestion de citas y agenda de la clinica</p>
+          <h1 class="text-2xl font-bold text-white">
+            {{ esOdontologo() ? 'Mis Citas' : 'Citas' }}
+          </h1>
+          <p class="text-gray-400 text-sm mt-1">
+            {{ esOdontologo() ? 'Tu agenda de citas programadas' : 'Gestión de citas y agenda de la clínica' }}
+          </p>
         </div>
-        <button
-          (click)="navegarNueva()"
-          class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm transition-colors cursor-pointer"
-        >
-          <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-          </svg>
-          Nueva Cita
-        </button>
+        @if (!esOdontologo()) {
+          <button
+            (click)="navegarNueva()"
+            class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm transition-colors cursor-pointer"
+          >
+            <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+            </svg>
+            Nueva Cita
+          </button>
+        }
       </div>
 
       <!-- Filtros -->
@@ -41,20 +49,22 @@ import { TableSkeletonComponent } from '../../shared/components/table-skeleton/t
             class="px-4 py-2 rounded-lg bg-gray-800 border border-gray-600 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
           />
         </div>
-        <div class="flex items-center gap-2">
-          <label for="odontologoFiltro" class="text-sm font-medium text-gray-300">Odontologo:</label>
-          <select
-            id="odontologoFiltro"
-            [value]="odontologoSeleccionado() ?? ''"
-            (change)="onOdontologoChange($event)"
-            class="px-4 py-2 rounded-lg bg-gray-800 border border-gray-600 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
-          >
-            <option value="">Todos</option>
-            @for (odontologo of odontologos(); track odontologo.id) {
-              <option [value]="odontologo.id">{{ odontologo.nombre }}</option>
-            }
-          </select>
-        </div>
+        @if (!esOdontologo()) {
+          <div class="flex items-center gap-2">
+            <label for="odontologoFiltro" class="text-sm font-medium text-gray-300">Odontologo:</label>
+            <select
+              id="odontologoFiltro"
+              [value]="odontologoSeleccionado() ?? ''"
+              (change)="onOdontologoChange($event)"
+              class="px-4 py-2 rounded-lg bg-gray-800 border border-gray-600 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+            >
+              <option value="">Todos</option>
+              @for (odontologo of odontologos(); track odontologo.id) {
+                <option [value]="odontologo.id">{{ odontologo.nombre }}</option>
+              }
+            </select>
+          </div>
+        }
         <div class="flex items-center gap-2">
           <label for="estadoFiltro" class="text-sm font-medium text-gray-300">Estado:</label>
           <select
@@ -89,7 +99,9 @@ import { TableSkeletonComponent } from '../../shared/components/table-skeleton/t
                 <tr>
                   <th class="px-6 py-4 font-medium">Hora</th>
                   <th class="px-6 py-4 font-medium">Paciente</th>
-                  <th class="px-6 py-4 font-medium">Odontologo</th>
+                  @if (!esOdontologo()) {
+                    <th class="px-6 py-4 font-medium">Odontologo</th>
+                  }
                   <th class="px-6 py-4 font-medium">Motivo</th>
                   <th class="px-6 py-4 font-medium text-center">Estado</th>
                   <th class="px-6 py-4 font-medium text-center">Acciones</th>
@@ -100,7 +112,9 @@ import { TableSkeletonComponent } from '../../shared/components/table-skeleton/t
                   <tr class="bg-gray-900 border-t border-gray-700 hover:bg-gray-800/70 transition-colors">
                     <td class="px-6 py-4 text-gray-200 font-medium">{{ cita.hora }}</td>
                     <td class="px-6 py-4 text-gray-300">{{ cita.pacienteNombre }}</td>
-                    <td class="px-6 py-4 text-gray-300">{{ cita.odontologoNombre }}</td>
+                    @if (!esOdontologo()) {
+                      <td class="px-6 py-4 text-gray-300">{{ cita.odontologoNombre }}</td>
+                    }
                     <td class="px-6 py-4 text-gray-300">{{ cita.motivo }}</td>
                     <td class="px-6 py-4 text-center">
                       <span [class]="getBadgeClass(cita.estado)">
@@ -160,6 +174,7 @@ import { TableSkeletonComponent } from '../../shared/components/table-skeleton/t
 })
 export class CitasComponent implements OnInit {
   private readonly citaService = inject(CitaService);
+  private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
   private readonly toast = inject(ToastService);
   private readonly confirmService = inject(ConfirmService);
@@ -169,8 +184,13 @@ export class CitasComponent implements OnInit {
   readonly odontologoSeleccionado = signal<number | null>(null);
   readonly estadoSeleccionado = signal<string | null>(null);
   readonly citasFiltradas = signal<Cita[]>([]);
+  readonly odontologos = signal<Odontologo[]>([]);
 
-  readonly odontologos = computed<Odontologo[]>(() => this.citaService.listarOdontologos());
+  readonly esOdontologo = computed(() =>
+    this.authService.currentUser()?.rol === UserRole.ODONTOLOGO
+  );
+  readonly miId = computed(() => this.authService.currentUser()?.id ?? null);
+
   readonly estados = computed<string[]>(() => [
     EstadoCita.PENDIENTE,
     EstadoCita.ATENDIDO,
@@ -179,11 +199,15 @@ export class CitasComponent implements OnInit {
   ]);
 
   ngOnInit(): void {
-    // Simular carga desde API
-    setTimeout(() => {
-      this.cargarCitas();
-      this.isLoading.set(false);
-    }, 600);
+    if (this.esOdontologo()) {
+      this.odontologoSeleccionado.set(this.miId());
+    } else {
+      this.citaService.listarOdontologos().subscribe({
+        next: (lista) => this.odontologos.set(lista),
+        error: () => {}
+      });
+    }
+    this.cargarCitas();
   }
 
   onFechaChange(event: Event): void {
@@ -194,15 +218,13 @@ export class CitasComponent implements OnInit {
 
   onOdontologoChange(event: Event): void {
     const select = event.target as HTMLSelectElement;
-    const value = select.value;
-    this.odontologoSeleccionado.set(value ? Number(value) : null);
+    this.odontologoSeleccionado.set(select.value ? Number(select.value) : null);
     this.cargarCitas();
   }
 
   onEstadoChange(event: Event): void {
     const select = event.target as HTMLSelectElement;
-    const value = select.value;
-    this.estadoSeleccionado.set(value || null);
+    this.estadoSeleccionado.set(select.value || null);
     this.cargarCitas();
   }
 
@@ -222,9 +244,13 @@ export class CitasComponent implements OnInit {
       type: 'info'
     });
     if (confirmado) {
-      this.citaService.atender(cita.id);
-      this.cargarCitas();
-      this.toast.success('Cita marcada como atendida');
+      this.citaService.atender(cita.id).subscribe({
+        next: () => {
+          this.toast.success('Cita marcada como atendida');
+          this.cargarCitas();
+        },
+        error: () => this.toast.error('Error al actualizar la cita')
+      });
     }
   }
 
@@ -236,9 +262,13 @@ export class CitasComponent implements OnInit {
       type: 'danger'
     });
     if (confirmado) {
-      this.citaService.cancelar(cita.id);
-      this.cargarCitas();
-      this.toast.warning('Cita cancelada');
+      this.citaService.cancelar(cita.id).subscribe({
+        next: () => {
+          this.toast.warning('Cita cancelada');
+          this.cargarCitas();
+        },
+        error: () => this.toast.error('Error al cancelar la cita')
+      });
     }
   }
 
@@ -257,24 +287,24 @@ export class CitasComponent implements OnInit {
   getBadgeClass(estado: EstadoCita): string {
     const base = 'inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium';
     switch (estado) {
-      case EstadoCita.PENDIENTE:
-        return `${base} bg-yellow-500/20 text-yellow-400`;
-      case EstadoCita.ATENDIDO:
-        return `${base} bg-green-500/20 text-green-400`;
-      case EstadoCita.CANCELADO:
-        return `${base} bg-red-500/20 text-red-400`;
-      case EstadoCita.REAGENDADO:
-        return `${base} bg-blue-500/20 text-blue-400`;
-      default:
-        return base;
+      case EstadoCita.PENDIENTE: return `${base} bg-yellow-500/20 text-yellow-400`;
+      case EstadoCita.ATENDIDO: return `${base} bg-green-500/20 text-green-400`;
+      case EstadoCita.CANCELADO: return `${base} bg-red-500/20 text-red-400`;
+      case EstadoCita.REAGENDADO: return `${base} bg-blue-500/20 text-blue-400`;
+      default: return base;
     }
   }
 
   private cargarCitas(): void {
+    this.isLoading.set(true);
     const odontologoId = this.odontologoSeleccionado() ?? undefined;
     const estado = this.estadoSeleccionado() ?? undefined;
-    this.citasFiltradas.set(
-      this.citaService.listarConFiltros(this.fechaSeleccionada(), odontologoId, estado)
-    );
+    this.citaService.listarConFiltros(this.fechaSeleccionada(), odontologoId, estado).subscribe({
+      next: (citas) => {
+        this.citasFiltradas.set(citas);
+        this.isLoading.set(false);
+      },
+      error: () => this.isLoading.set(false)
+    });
   }
 }

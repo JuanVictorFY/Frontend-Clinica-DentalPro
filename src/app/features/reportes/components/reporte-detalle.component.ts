@@ -85,7 +85,10 @@ export class ReporteDetalleComponent implements OnInit {
   ngOnInit(): void {
     const reporteId = Number(this.id());
     if (!isNaN(reporteId)) {
-      this.reporte.set(this.reporteService.obtenerPorId(reporteId));
+      this.reporteService.obtenerPorId(reporteId).subscribe({
+        next: (r) => this.reporte.set(r),
+        error: () => {}
+      });
     }
   }
 

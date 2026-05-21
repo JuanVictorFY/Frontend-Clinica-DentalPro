@@ -1,13 +1,10 @@
 import { Component, inject, signal, OnInit, input } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { HttpErrorResponse } from '@angular/common/http';
 import { PacienteService } from '../services/paciente.service';
 import { ToastService } from '../../../shared/services/toast.service';
 
-/**
- * Componente de formulario reactivo para registrar/editar pacientes.
- * Soporta modo creación y edición según la presencia de pacienteId.
- */
 @Component({
   selector: 'app-paciente-form',
   standalone: true,
@@ -61,7 +58,7 @@ import { ToastService } from '../../../shared/services/toast.service';
             formControlName="dni"
             placeholder="Ej: 12345678"
             maxlength="8"
-            (blur)="validarDniDuplicado()"
+            (input)="dniDuplicado.set(false)"
             class="w-full px-4 py-2.5 rounded-lg bg-gray-800 border text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
             [class.border-red-500]="isFieldInvalid('dni') || dniDuplicado()"
             [class.border-gray-600]="!isFieldInvalid('dni') && !dniDuplicado()"
@@ -167,19 +164,11 @@ export class PacienteFormComponent implements OnInit {
   private readonly pacienteService = inject(PacienteService);
   private readonly toast = inject(ToastService);
 
-  /** ID del paciente para modo edición (viene de la ruta) */
   readonly pacienteId = input<string | undefined>(undefined, { alias: 'id' });
-
-  /** Señal reactiva para controlar el estado de carga */
   readonly isLoading = signal(false);
-
-  /** Señal para determinar si estamos en modo edición */
   readonly esEdicion = signal(false);
-
-  /** Señal para indicar si el DNI está duplicado */
   readonly dniDuplicado = signal(false);
 
-  /** Formulario reactivo con validaciones */
   readonly pacienteForm: FormGroup = this.fb.group({
     nombreCompleto: ['', [Validators.required]],
     dni: ['', [Validators.required, Validators.pattern(/^\d{8}$/)]],
@@ -192,70 +181,63 @@ export class PacienteFormComponent implements OnInit {
     const id = this.pacienteId();
     if (id) {
       this.esEdicion.set(true);
-      const paciente = this.pacienteService.obtenerPorId(Number(id));
-      if (paciente) {
-        this.pacienteForm.patchValue({
-          nombreCompleto: paciente.nombreCompleto,
-          dni: paciente.dni,
-          fechaNacimiento: paciente.fechaNacimiento,
-          telefono: paciente.telefono,
-          email: paciente.email,
-        });
-      }
+      this.isLoading.set(true);
+      this.pacienteService.obtenerPorId(Number(id)).subscribe({
+        next: (paciente) => {
+          this.pacienteForm.patchValue({
+            nombreCompleto: paciente.nombreCompleto,
+            dni: paciente.dni,
+            fechaNacimiento: paciente.fechaNacimiento,
+            telefono: paciente.telefono,
+            email: paciente.email,
+          });
+          this.isLoading.set(false);
+        },
+        error: () => {
+          this.toast.error('No se pudo cargar el paciente');
+          this.isLoading.set(false);
+          this.router.navigate(['/intranet/pacientes']);
+        }
+      });
     }
   }
 
-  /** Verifica si un campo es inválido y ha sido tocado */
   isFieldInvalid(fieldName: string): boolean {
     const control = this.pacienteForm.get(fieldName);
     return !!(control && control.invalid && control.touched);
   }
 
-  /** Valida si el DNI ya existe al perder el foco */
-  validarDniDuplicado(): void {
-    const dniControl = this.pacienteForm.get('dni');
-    if (!dniControl || dniControl.invalid) {
-      this.dniDuplicado.set(false);
-      return;
-    }
-    const dni = dniControl.value;
-    const excludeId = this.esEdicion() ? Number(this.pacienteId()) : undefined;
-    this.dniDuplicado.set(this.pacienteService.existeDni(dni, excludeId));
-  }
-
-  /** Maneja el envío del formulario */
   onSubmit(): void {
     if (this.pacienteForm.invalid) {
       this.pacienteForm.markAllAsTouched();
       return;
     }
 
-    const datos = this.pacienteForm.value;
-    const excludeId = this.esEdicion() ? Number(this.pacienteId()) : undefined;
-
-    // Validar DNI duplicado antes de guardar
-    if (this.pacienteService.existeDni(datos.dni, excludeId)) {
-      this.dniDuplicado.set(true);
-      this.toast.error('Ya existe un paciente con ese DNI');
-      return;
-    }
-
     this.isLoading.set(true);
+    this.dniDuplicado.set(false);
+    const datos = this.pacienteForm.value;
 
-    if (this.esEdicion()) {
-      const id = Number(this.pacienteId());
-      this.pacienteService.actualizar(id, datos);
-      this.toast.success('Paciente actualizado exitosamente');
-    } else {
-      this.pacienteService.registrar(datos);
-      this.toast.success('Paciente registrado exitosamente');
-    }
+    const obs = this.esEdicion()
+      ? this.pacienteService.actualizar(Number(this.pacienteId()), datos)
+      : this.pacienteService.crear(datos);
 
-    this.isLoading.set(false);
-    this.router.navigate(['/intranet/pacientes']);
+    obs.subscribe({
+      next: () => {
+        this.toast.success(this.esEdicion() ? 'Paciente actualizado exitosamente' : 'Paciente registrado exitosamente');
+        this.router.navigate(['/intranet/pacientes']);
+      },
+      error: (err: HttpErrorResponse) => {
+        this.isLoading.set(false);
+        if (err.status === 409) {
+          this.dniDuplicado.set(true);
+          this.toast.error('Ya existe un paciente con ese DNI');
+        } else {
+          this.toast.error('Error al guardar el paciente');
+        }
+      }
+    });
   }
 
-  /** Navega de vuelta a la lista */
   cancelar(): void {
     this.router.navigate(['/intranet/pacientes']);
   }

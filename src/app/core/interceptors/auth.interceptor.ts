@@ -40,9 +40,11 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
       if (error instanceof HttpErrorResponse) {
         switch (error.status) {
           case 401:
-            // Token expirado o inválido: cerrar sesión y redirigir
-            console.warn('[DentalPro] Sesión expirada o no autorizada. Redirigiendo al login...');
-            authService.logout();
+            // No interferir con el flujo de login (el servicio maneja el fallback)
+            if (!req.url.includes('/api/auth/')) {
+              console.warn('[DentalPro] Sesión expirada o no autorizada. Redirigiendo al login...');
+              authService.logout();
+            }
             break;
 
           case 403:

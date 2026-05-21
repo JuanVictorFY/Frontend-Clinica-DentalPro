@@ -1,5 +1,6 @@
 import { Component, inject, signal, computed, OnInit, input } from '@angular/core';
 import { Router } from '@angular/router';
+import { forkJoin } from 'rxjs';
 import { PacienteService } from '../services/paciente.service';
 import { CitaService } from '../../citas/services/cita.service';
 import { AtencionService } from '../../atencion/services/atencion.service';
@@ -37,7 +38,14 @@ import { NotaClinica } from '../../atencion/models/atencion.model';
         </div>
       </div>
 
-      @if (paciente()) {
+      @if (isLoading()) {
+        <div class="flex items-center justify-center py-12">
+          <svg class="animate-spin h-8 w-8 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+        </div>
+      } @else if (paciente()) {
         <!-- Datos personales -->
         <div class="p-6 bg-gray-900 rounded-xl border border-gray-700">
           <h2 class="text-lg font-semibold text-white mb-4">Datos del Paciente</h2>
@@ -186,9 +194,9 @@ export class PacienteDetalleComponent implements OnInit {
   private readonly citaService = inject(CitaService);
   private readonly atencionService = inject(AtencionService);
 
-  /** ID del paciente desde la ruta */
   readonly id = input<string>('');
 
+  readonly isLoading = signal(true);
   readonly paciente = signal<Paciente | undefined>(undefined);
   readonly citas = signal<Cita[]>([]);
   readonly notas = signal<NotaClinica[]>([]);
@@ -197,36 +205,39 @@ export class PacienteDetalleComponent implements OnInit {
   readonly totalNotas = computed(() => this.notas().length);
   readonly ultimaCita = computed(() => {
     const lista = this.citas();
-    if (lista.length === 0) return '';
-    return lista[0].fecha;
+    return lista.length > 0 ? lista[0].fecha : '';
   });
 
   ngOnInit(): void {
     const pacienteId = Number(this.id());
-    if (!pacienteId) return;
-
-    const paciente = this.pacienteService.obtenerPorId(pacienteId);
-    this.paciente.set(paciente);
-
-    if (paciente) {
-      this.citas.set(this.citaService.listarPorPaciente(pacienteId));
-      this.notas.set(this.atencionService.listarPorPaciente(pacienteId));
+    if (!pacienteId) {
+      this.isLoading.set(false);
+      return;
     }
+
+    forkJoin({
+      paciente: this.pacienteService.obtenerPorId(pacienteId),
+      citas: this.citaService.listarPorPaciente(pacienteId),
+      notas: this.atencionService.listarPorPaciente(pacienteId)
+    }).subscribe({
+      next: ({ paciente, citas, notas }) => {
+        this.paciente.set(paciente);
+        this.citas.set(citas);
+        this.notas.set(notas);
+        this.isLoading.set(false);
+      },
+      error: () => this.isLoading.set(false)
+    });
   }
 
   getBadgeClass(estado: EstadoCita): string {
     const base = 'inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium';
     switch (estado) {
-      case EstadoCita.PENDIENTE:
-        return `${base} bg-yellow-500/20 text-yellow-400`;
-      case EstadoCita.ATENDIDO:
-        return `${base} bg-green-500/20 text-green-400`;
-      case EstadoCita.CANCELADO:
-        return `${base} bg-red-500/20 text-red-400`;
-      case EstadoCita.REAGENDADO:
-        return `${base} bg-blue-500/20 text-blue-400`;
-      default:
-        return base;
+      case EstadoCita.PENDIENTE: return `${base} bg-yellow-500/20 text-yellow-400`;
+      case EstadoCita.ATENDIDO: return `${base} bg-green-500/20 text-green-400`;
+      case EstadoCita.CANCELADO: return `${base} bg-red-500/20 text-red-400`;
+      case EstadoCita.REAGENDADO: return `${base} bg-blue-500/20 text-blue-400`;
+      default: return base;
     }
   }
 

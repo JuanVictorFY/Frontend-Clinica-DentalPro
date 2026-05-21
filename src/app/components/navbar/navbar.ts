@@ -1,6 +1,7 @@
 import { Component, signal, inject, PLATFORM_ID, OnInit, OnDestroy } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { RouterLink, RouterLinkActive } from '@angular/router';
+import { AuthModalService } from '../../core/services/auth-modal.service';
 
 @Component({
   selector: 'app-navbar',
@@ -11,6 +12,7 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
 })
 export class Navbar implements OnInit, OnDestroy {
   private platformId = inject(PLATFORM_ID);
+  readonly authModal = inject(AuthModalService);
 
   mobileMenuOpen = signal(false);
   scrolled = signal(false);

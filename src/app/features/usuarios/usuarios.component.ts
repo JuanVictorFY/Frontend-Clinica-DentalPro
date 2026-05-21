@@ -136,11 +136,10 @@ export class UsuariosComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    // Simular carga desde API
-    setTimeout(() => {
-      this.usuarios.set(this.usuarioService.listar());
-      this.isLoading.set(false);
-    }, 600);
+    this.usuarioService.listar().subscribe({
+      next: (data) => { this.usuarios.set(data); this.isLoading.set(false); },
+      error: () => this.isLoading.set(false)
+    });
   }
 
   onPageChange(page: number): void {
@@ -150,7 +149,7 @@ export class UsuariosComponent implements OnInit {
   getRolBadgeClass(rol: UserRole): string {
     const base = 'px-2.5 py-1 rounded-full text-xs font-medium';
     switch (rol) {
-      case UserRole.ADMIN:
+      case UserRole.ADMINISTRADOR:
         return `${base} bg-purple-500/20 text-purple-400`;
       case UserRole.RECEPCIONISTA:
         return `${base} bg-blue-500/20 text-blue-400`;
@@ -177,10 +176,15 @@ export class UsuariosComponent implements OnInit {
       type: 'danger'
     });
     if (confirmado) {
-      this.usuarioService.eliminar(usuario.id);
-      this.usuarios.set(this.usuarioService.listar());
-      this.currentPage.set(1);
-      this.toast.success('Usuario eliminado correctamente');
+      this.usuarioService.eliminar(usuario.id).subscribe({
+        next: () => {
+          this.usuarioService.listar().subscribe({
+            next: (data) => { this.usuarios.set(data); this.currentPage.set(1); }
+          });
+          this.toast.success('Usuario eliminado correctamente');
+        },
+        error: () => this.toast.error('No se pudo eliminar el usuario')
+      });
     }
   }
 }

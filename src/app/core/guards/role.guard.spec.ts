@@ -34,7 +34,7 @@ describe('roleGuard', () => {
 
   describe('sin sesion activa', () => {
     it('debe redirigir a /login si no hay rol', () => {
-      const route = createRouteWithRoles([UserRole.ADMIN]);
+      const route = createRouteWithRoles([UserRole.ADMINISTRADOR]);
 
       const result = TestBed.runInInjectionContext(() =>
         roleGuard(route, mockState)
@@ -51,7 +51,7 @@ describe('roleGuard', () => {
     });
 
     it('debe permitir acceso a rutas de ADMIN', () => {
-      const route = createRouteWithRoles([UserRole.ADMIN]);
+      const route = createRouteWithRoles([UserRole.ADMINISTRADOR]);
 
       const result = TestBed.runInInjectionContext(() =>
         roleGuard(route, mockState)
@@ -87,7 +87,7 @@ describe('roleGuard', () => {
     });
 
     it('debe permitir acceso a rutas que incluyen RECEPCIONISTA', () => {
-      const route = createRouteWithRoles([UserRole.ADMIN, UserRole.RECEPCIONISTA]);
+      const route = createRouteWithRoles([UserRole.ADMINISTRADOR, UserRole.RECEPCIONISTA]);
 
       const result = TestBed.runInInjectionContext(() =>
         roleGuard(route, mockState)
@@ -97,7 +97,7 @@ describe('roleGuard', () => {
     });
 
     it('debe denegar acceso a rutas solo de ADMIN', () => {
-      const route = createRouteWithRoles([UserRole.ADMIN]);
+      const route = createRouteWithRoles([UserRole.ADMINISTRADOR]);
 
       const result = TestBed.runInInjectionContext(() =>
         roleGuard(route, mockState)
@@ -108,7 +108,7 @@ describe('roleGuard', () => {
     });
 
     it('debe denegar acceso a rutas solo de ODONTOLOGO', () => {
-      const route = createRouteWithRoles([UserRole.ADMIN, UserRole.ODONTOLOGO]);
+      const route = createRouteWithRoles([UserRole.ADMINISTRADOR, UserRole.ODONTOLOGO]);
 
       const result = TestBed.runInInjectionContext(() =>
         roleGuard(route, mockState)
@@ -125,7 +125,7 @@ describe('roleGuard', () => {
     });
 
     it('debe permitir acceso a rutas que incluyen ODONTOLOGO', () => {
-      const route = createRouteWithRoles([UserRole.ADMIN, UserRole.ODONTOLOGO]);
+      const route = createRouteWithRoles([UserRole.ADMINISTRADOR, UserRole.ODONTOLOGO]);
 
       const result = TestBed.runInInjectionContext(() =>
         roleGuard(route, mockState)
@@ -135,7 +135,7 @@ describe('roleGuard', () => {
     });
 
     it('debe denegar acceso a rutas solo de ADMIN', () => {
-      const route = createRouteWithRoles([UserRole.ADMIN]);
+      const route = createRouteWithRoles([UserRole.ADMINISTRADOR]);
 
       const result = TestBed.runInInjectionContext(() =>
         roleGuard(route, mockState)
@@ -146,7 +146,7 @@ describe('roleGuard', () => {
     });
 
     it('debe denegar acceso a rutas solo de RECEPCIONISTA', () => {
-      const route = createRouteWithRoles([UserRole.ADMIN, UserRole.RECEPCIONISTA]);
+      const route = createRouteWithRoles([UserRole.ADMINISTRADOR, UserRole.RECEPCIONISTA]);
 
       const result = TestBed.runInInjectionContext(() =>
         roleGuard(route, mockState)

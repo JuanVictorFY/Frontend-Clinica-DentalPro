@@ -1,33 +1,48 @@
 import { Injectable, inject, signal, computed } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { UserRole, UserProfile, TokenPayload } from '../models/user.model';
+import { Observable } from 'rxjs';
+import { tap, map } from 'rxjs/operators';
+import { UserRole, UserProfile } from '../models/user.model';
 
-const MOCK_USERS: Record<string, { password: string; profile: UserProfile }> = {
-  'admin@dental.com': {
-    password: '123456',
-    profile: { id: 1, nombreCompleto: 'Administrador General', email: 'admin@dental.com', rol: UserRole.ADMIN }
-  },
-  'recepcion@dental.com': {
-    password: '123456',
-    profile: { id: 2, nombreCompleto: 'Ana García López', email: 'recepcion@dental.com', rol: UserRole.RECEPCIONISTA }
-  },
-  'doctor@dental.com': {
-    password: '123456',
-    profile: { id: 3, nombreCompleto: 'Dr. Carlos Mendoza', email: 'doctor@dental.com', rol: UserRole.ODONTOLOGO }
-  }
-};
+interface LoginApiResponse {
+  token: string;
+  user: {
+    id: number;
+    nombreCompleto: string;
+    email: string;
+    rol: string;
+  };
+}
 
 const TOKEN_KEY = 'dental_pro_token';
+const USER_KEY  = 'dental_pro_user';
+const API = 'http://localhost:8080/api/auth';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
+  private readonly http   = inject(HttpClient);
   private readonly router = inject(Router);
 
-  readonly currentUser = signal<UserProfile | null>(null);
+  readonly currentUser    = signal<UserProfile | null>(null);
   readonly isAuthenticated = computed(() => this.currentUser() !== null && !this.isTokenExpired());
 
-  constructor() {
-    this.restoreSession();
+  constructor() { this.restoreSession(); }
+
+  /** Login para personal de la clínica (tabla usuarios) */
+  login(email: string, password: string): Observable<UserProfile> {
+    return this.http.post<LoginApiResponse>(`${API}/login`, { email, password }).pipe(
+      tap(res  => this.saveSession(res)),
+      map(res  => ({ ...res.user, rol: res.user.rol as UserRole }))
+    );
+  }
+
+  /** Login para pacientes (tabla pacientes) */
+  loginPaciente(email: string, password: string): Observable<UserProfile> {
+    return this.http.post<LoginApiResponse>(`${API}/login-paciente`, { email, password }).pipe(
+      tap(res  => this.saveSession(res)),
+      map(res  => ({ ...res.user, rol: res.user.rol as UserRole }))
+    );
   }
 
   getToken(): string | null {
@@ -37,94 +52,50 @@ export class AuthService {
 
   getUserRole(): UserRole | null {
     const payload = this.decodeToken();
-    return payload ? payload.rol : null;
+    return payload ? payload.rol as UserRole : null;
   }
 
   isTokenExpired(): boolean {
     const payload = this.decodeToken();
     if (!payload) return true;
-    const now = Math.floor(Date.now() / 1000);
-    return payload.exp < now;
-  }
-
-  login(email: string, password: string): { success: boolean; error?: string } {
-    const user = MOCK_USERS[email.toLowerCase()];
-
-    if (!user) {
-      return { success: false, error: 'Usuario no encontrado.' };
-    }
-
-    if (user.password !== password) {
-      return { success: false, error: 'Contraseña incorrecta.' };
-    }
-
-    const token = this.generateFakeToken(user.profile);
-    localStorage.setItem(TOKEN_KEY, token);
-    this.currentUser.set(user.profile);
-
-    return { success: true };
+    return payload.exp < Math.floor(Date.now() / 1000);
   }
 
   logout(): void {
     if (typeof window !== 'undefined') {
       localStorage.removeItem(TOKEN_KEY);
+      localStorage.removeItem(USER_KEY);
     }
     this.currentUser.set(null);
     this.router.navigate(['/login']);
   }
 
+  private saveSession(res: LoginApiResponse): void {
+    localStorage.setItem(TOKEN_KEY, res.token);
+    localStorage.setItem(USER_KEY, JSON.stringify(res.user));
+    this.currentUser.set({ ...res.user, rol: res.user.rol as UserRole });
+  }
+
   private restoreSession(): void {
     if (typeof window === 'undefined') return;
-
     const token = this.getToken();
-    if (!token || this.isTokenExpired()) {
-      this.currentUser.set(null);
-      return;
-    }
-
-    const payload = this.decodeToken();
-    if (payload) {
-      const email = payload.sub;
-      const user = MOCK_USERS[email];
-      if (user) {
-        this.currentUser.set(user.profile);
-      }
+    if (!token || this.isTokenExpired()) { this.currentUser.set(null); return; }
+    const userJson = localStorage.getItem(USER_KEY);
+    if (userJson) {
+      try {
+        const user = JSON.parse(userJson);
+        this.currentUser.set({ ...user, rol: user.rol as UserRole });
+      } catch { this.currentUser.set(null); }
     }
   }
 
-  private generateFakeToken(profile: UserProfile): string {
-    const header = { alg: 'HS256', typ: 'JWT' };
-    const now = Math.floor(Date.now() / 1000);
-    const payload: TokenPayload = {
-      sub: profile.email,
-      rol: profile.rol,
-      iat: now,
-      exp: now + 86400 // 24 hours
-    };
-
-    const encodedHeader = this.base64UrlEncode(JSON.stringify(header));
-    const encodedPayload = this.base64UrlEncode(JSON.stringify(payload));
-    const signature = this.base64UrlEncode('fake-signature-dental-pro');
-
-    return `${encodedHeader}.${encodedPayload}.${signature}`;
-  }
-
-  private decodeToken(): TokenPayload | null {
+  private decodeToken(): { sub: string; rol: string; userId: number; exp: number; iat: number } | null {
     const token = this.getToken();
     if (!token) return null;
-
     try {
       const parts = token.split('.');
       if (parts.length !== 3) return null;
-
-      const payload = JSON.parse(atob(parts[1]));
-      return payload as TokenPayload;
-    } catch {
-      return null;
-    }
-  }
-
-  private base64UrlEncode(str: string): string {
-    return btoa(str).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+      return JSON.parse(atob(parts[1]));
+    } catch { return null; }
   }
 }

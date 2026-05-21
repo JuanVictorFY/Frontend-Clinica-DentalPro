@@ -1,7 +1,9 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { CitaService } from '../citas/services/cita.service';
+import { AuthService } from '../../core/services/auth.service';
 import { Cita, EstadoCita } from '../citas/models/cita.model';
+import { UserRole } from '../../core/models/user.model';
 
 @Component({
   selector: 'app-atencion',
@@ -14,8 +16,14 @@ import { Cita, EstadoCita } from '../citas/models/cita.model';
         <p class="text-gray-400 text-sm mt-1">Citas pendientes de atención odontológica</p>
       </div>
 
-      <!-- Lista de citas pendientes -->
-      @if (citasPendientes().length === 0) {
+      @if (isLoading()) {
+        <div class="flex items-center justify-center py-12">
+          <svg class="animate-spin h-8 w-8 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+        </div>
+      } @else if (citasPendientes().length === 0) {
         <div class="w-full rounded-xl border border-gray-700 bg-gray-900 p-8 flex flex-col items-center justify-center gap-3">
           <svg class="w-12 h-12 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
@@ -76,12 +84,29 @@ import { Cita, EstadoCita } from '../citas/models/cita.model';
 })
 export class AtencionComponent implements OnInit {
   private readonly citaService = inject(CitaService);
+  private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
 
+  readonly isLoading = signal(true);
   readonly citasPendientes = signal<Cita[]>([]);
 
   ngOnInit(): void {
-    this.cargarCitasPendientes();
+    const hoy = new Date().toISOString().split('T')[0];
+    const user = this.authService.currentUser();
+
+    const obs = user?.rol === UserRole.ODONTOLOGO
+      ? this.citaService.listarConFiltros(hoy, user.id)
+      : this.citaService.listarPorFecha(hoy);
+
+    obs.subscribe({
+      next: (citas) => {
+        this.citasPendientes.set(
+          citas.filter(c => c.estado === EstadoCita.PENDIENTE || c.estado === EstadoCita.REAGENDADO)
+        );
+        this.isLoading.set(false);
+      },
+      error: () => this.isLoading.set(false)
+    });
   }
 
   navegarAtender(citaId: number): void {
@@ -91,20 +116,9 @@ export class AtencionComponent implements OnInit {
   getBadgeClass(estado: EstadoCita): string {
     const base = 'inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium whitespace-nowrap';
     switch (estado) {
-      case EstadoCita.PENDIENTE:
-        return `${base} bg-yellow-500/20 text-yellow-400`;
-      case EstadoCita.REAGENDADO:
-        return `${base} bg-blue-500/20 text-blue-400`;
-      default:
-        return base;
+      case EstadoCita.PENDIENTE: return `${base} bg-yellow-500/20 text-yellow-400`;
+      case EstadoCita.REAGENDADO: return `${base} bg-blue-500/20 text-blue-400`;
+      default: return base;
     }
-  }
-
-  private cargarCitasPendientes(): void {
-    const hoy = new Date().toISOString().split('T')[0];
-    const citasHoy = this.citaService.listarPorFecha(hoy);
-    this.citasPendientes.set(
-      citasHoy.filter(c => c.estado === EstadoCita.PENDIENTE || c.estado === EstadoCita.REAGENDADO)
-    );
   }
 }

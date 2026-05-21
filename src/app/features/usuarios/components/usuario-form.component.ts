@@ -2,7 +2,6 @@ import { Component, inject, signal, OnInit, input } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { UsuarioService } from '../services/usuario.service';
-import { UserRole } from '../../../core/models/user.model';
 import { ToastService } from '../../../shared/services/toast.service';
 
 /**
@@ -105,7 +104,7 @@ import { ToastService } from '../../../shared/services/toast.service';
             [class.border-gray-600]="!isFieldInvalid('rol')"
           >
             <option value="" disabled>Seleccione un rol</option>
-            <option value="ADMIN">Administrador</option>
+            <option value="ADMINISTRADOR">Administrador</option>
             <option value="RECEPCIONISTA">Recepcionista</option>
             <option value="ODONTOLOGO">Odontólogo</option>
           </select>
@@ -171,18 +170,22 @@ export class UsuarioFormComponent implements OnInit {
     const id = this.usuarioId();
     if (id) {
       this.esEdicion.set(true);
-      // En modo edición, la contraseña no es obligatoria
       this.usuarioForm.get('password')?.clearValidators();
       this.usuarioForm.get('password')?.updateValueAndValidity();
 
-      const usuario = this.usuarioService.obtenerPorId(Number(id));
-      if (usuario) {
-        this.usuarioForm.patchValue({
-          nombreCompleto: usuario.nombreCompleto,
-          email: usuario.email,
-          rol: usuario.rol,
-        });
-      }
+      this.usuarioService.obtenerPorId(Number(id)).subscribe({
+        next: (usuario) => {
+          this.usuarioForm.patchValue({
+            nombreCompleto: usuario.nombreCompleto,
+            email: usuario.email,
+            rol: usuario.rol,
+          });
+        },
+        error: () => {
+          this.toast.error('No se pudo cargar el usuario');
+          this.router.navigate(['/intranet/usuarios']);
+        }
+      });
     }
   }
 
@@ -203,17 +206,20 @@ export class UsuarioFormComponent implements OnInit {
 
     const datos = this.usuarioForm.value;
 
-    if (this.esEdicion()) {
-      const id = Number(this.usuarioId());
-      this.usuarioService.actualizar(id, datos);
-      this.toast.success('Usuario actualizado exitosamente');
-    } else {
-      this.usuarioService.registrar(datos);
-      this.toast.success('Usuario registrado exitosamente');
-    }
+    const request$ = this.esEdicion()
+      ? this.usuarioService.actualizar(Number(this.usuarioId()), datos)
+      : this.usuarioService.crear(datos);
 
-    this.isLoading.set(false);
-    this.router.navigate(['/intranet/usuarios']);
+    request$.subscribe({
+      next: () => {
+        this.toast.success(this.esEdicion() ? 'Usuario actualizado exitosamente' : 'Usuario registrado exitosamente');
+        this.router.navigate(['/intranet/usuarios']);
+      },
+      error: () => {
+        this.toast.error('Ocurrió un error al guardar el usuario');
+        this.isLoading.set(false);
+      }
+    });
   }
 
   /** Navega de vuelta a la lista */

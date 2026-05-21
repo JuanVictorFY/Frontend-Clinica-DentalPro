@@ -1,87 +1,31 @@
-import { Injectable, signal } from '@angular/core';
-import { UserRole } from '../../../core/models/user.model';
+import { Injectable, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
 import { Usuario, UsuarioRequest } from '../models/usuario.model';
 
-@Injectable({
-  providedIn: 'root'
-})
+const API = 'http://localhost:8080/api/usuarios';
+
+@Injectable({ providedIn: 'root' })
 export class UsuarioService {
-  private readonly usuarios = signal<Usuario[]>([
-    {
-      id: 1,
-      nombreCompleto: 'Dr. Admin Principal',
-      email: 'admin@dentalpro.com',
-      rol: UserRole.ADMIN,
-      activo: true
-    },
-    {
-      id: 2,
-      nombreCompleto: 'María López García',
-      email: 'recepcion@dentalpro.com',
-      rol: UserRole.RECEPCIONISTA,
-      activo: true
-    },
-    {
-      id: 3,
-      nombreCompleto: 'Dr. Carlos Mendoza',
-      email: 'doctor@dentalpro.com',
-      rol: UserRole.ODONTOLOGO,
-      activo: true
-    },
-    {
-      id: 4,
-      nombreCompleto: 'Ana Sofía Ramírez',
-      email: 'ana.ramirez@dentalpro.com',
-      rol: UserRole.RECEPCIONISTA,
-      activo: false
-    },
-    {
-      id: 5,
-      nombreCompleto: 'Dra. Patricia Huamán',
-      email: 'patricia.huaman@dentalpro.com',
-      rol: UserRole.ODONTOLOGO,
-      activo: true
-    }
-  ]);
+  private readonly http = inject(HttpClient);
 
-  private nextId = 6;
-
-  /** Retorna la lista completa de usuarios */
-  listar(): Usuario[] {
-    return this.usuarios();
+  listar(): Observable<Usuario[]> {
+    return this.http.get<Usuario[]>(API);
   }
 
-  /** Obtiene un usuario por su ID */
-  obtenerPorId(id: number): Usuario | undefined {
-    return this.usuarios().find(u => u.id === id);
+  obtenerPorId(id: number): Observable<Usuario> {
+    return this.http.get<Usuario>(`${API}/${id}`);
   }
 
-  /** Registra un nuevo usuario */
-  registrar(usuario: UsuarioRequest): void {
-    const nuevo: Usuario = {
-      id: this.nextId++,
-      nombreCompleto: usuario.nombreCompleto,
-      email: usuario.email,
-      rol: usuario.rol,
-      activo: true
-    };
-    this.usuarios.update(list => [...list, nuevo]);
+  crear(usuario: UsuarioRequest): Observable<Usuario> {
+    return this.http.post<Usuario>(API, usuario);
   }
 
-  /** Actualiza un usuario existente */
-  actualizar(id: number, usuario: UsuarioRequest): void {
-    this.usuarios.update(list =>
-      list.map(u => u.id === id ? {
-        ...u,
-        nombreCompleto: usuario.nombreCompleto,
-        email: usuario.email,
-        rol: usuario.rol
-      } : u)
-    );
+  actualizar(id: number, usuario: UsuarioRequest): Observable<Usuario> {
+    return this.http.put<Usuario>(`${API}/${id}`, usuario);
   }
 
-  /** Elimina un usuario por su ID */
-  eliminar(id: number): void {
-    this.usuarios.update(list => list.filter(u => u.id !== id));
+  eliminar(id: number): Observable<void> {
+    return this.http.delete<void>(`${API}/${id}`);
   }
 }

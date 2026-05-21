@@ -1,10 +1,9 @@
 import { Component, inject, computed, signal, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
-import { PacienteService } from '../pacientes/services/paciente.service';
-import { CitaService } from '../citas/services/cita.service';
-import { AtencionService } from '../atencion/services/atencion.service';
+import { DashboardService, CitaDashboard, OdontologoConReportes } from './dashboard.service';
 import { EstadoCita } from '../citas/models/cita.model';
+import { UserRole } from '../../core/models/user.model';
 
 @Component({
   selector: 'app-dashboard',
@@ -18,21 +17,24 @@ import { EstadoCita } from '../citas/models/cita.model';
       </div>
 
       <!-- Metric Cards -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-        <!-- Total Pacientes -->
-        <div class="bg-gray-900 border border-gray-700 rounded-xl p-5 border-l-4 border-l-blue-500">
-          <div class="flex items-center gap-4">
-            <div class="w-12 h-12 rounded-lg bg-blue-500/20 flex items-center justify-center shrink-0">
-              <svg class="w-6 h-6 text-blue-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/>
-              </svg>
-            </div>
-            <div>
-              <p class="text-3xl font-bold text-white">{{ totalPacientes() }}</p>
-              <p class="text-sm text-gray-400">Total Pacientes</p>
+      <div [class]="gridClass()">
+
+        <!-- Total Pacientes (solo Admin y Recepcionista) -->
+        @if (!esOdontologo()) {
+          <div class="bg-gray-900 border border-gray-700 rounded-xl p-5 border-l-4 border-l-blue-500">
+            <div class="flex items-center gap-4">
+              <div class="w-12 h-12 rounded-lg bg-blue-500/20 flex items-center justify-center shrink-0">
+                <svg class="w-6 h-6 text-blue-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/>
+                </svg>
+              </div>
+              <div>
+                <p class="text-3xl font-bold text-white">{{ totalPacientes() }}</p>
+                <p class="text-sm text-gray-400">Total Pacientes</p>
+              </div>
             </div>
           </div>
-        </div>
+        }
 
         <!-- Citas del Día -->
         <div class="bg-gray-900 border border-gray-700 rounded-xl p-5 border-l-4 border-l-purple-500">
@@ -44,7 +46,7 @@ import { EstadoCita } from '../citas/models/cita.model';
             </div>
             <div>
               <p class="text-3xl font-bold text-white">{{ citasDelDia() }}</p>
-              <p class="text-sm text-gray-400">Citas del Día</p>
+              <p class="text-sm text-gray-400">{{ esOdontologo() ? 'Mis Citas del Día' : 'Citas del Día' }}</p>
             </div>
           </div>
         </div>
@@ -59,7 +61,7 @@ import { EstadoCita } from '../citas/models/cita.model';
             </div>
             <div>
               <p class="text-3xl font-bold text-white">{{ citasPendientes() }}</p>
-              <p class="text-sm text-gray-400">Citas Pendientes</p>
+              <p class="text-sm text-gray-400">Pendientes</p>
             </div>
           </div>
         </div>
@@ -74,10 +76,27 @@ import { EstadoCita } from '../citas/models/cita.model';
             </div>
             <div>
               <p class="text-3xl font-bold text-white">{{ atencionesRealizadas() }}</p>
-              <p class="text-sm text-gray-400">Atenciones Realizadas</p>
+              <p class="text-sm text-gray-400">Atendidas</p>
             </div>
           </div>
         </div>
+
+        <!-- Canceladas (Odontólogo y Recepcionista) -->
+        @if (esOdontologo() || esRecepcionista()) {
+          <div class="bg-gray-900 border border-gray-700 rounded-xl p-5 border-l-4 border-l-red-500">
+            <div class="flex items-center gap-4">
+              <div class="w-12 h-12 rounded-lg bg-red-500/20 flex items-center justify-center shrink-0">
+                <svg class="w-6 h-6 text-red-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+              </div>
+              <div>
+                <p class="text-3xl font-bold text-white">{{ citasCanceladas() }}</p>
+                <p class="text-sm text-gray-400">Canceladas</p>
+              </div>
+            </div>
+          </div>
+        }
       </div>
 
       <!-- Quick Actions -->
@@ -93,15 +112,17 @@ import { EstadoCita } from '../citas/models/cita.model';
             </svg>
             Nueva Cita
           </button>
-          <button
-            (click)="navigateTo('/intranet/pacientes/nuevo')"
-            class="flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium text-sm transition-colors"
-          >
-            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M19 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zM4 19.235v-.11a6.375 6.375 0 0112.75 0v.109A12.318 12.318 0 0110.374 21c-2.331 0-4.512-.645-6.374-1.766z"/>
-            </svg>
-            Nuevo Paciente
-          </button>
+          @if (!esOdontologo()) {
+            <button
+              (click)="navigateTo('/intranet/pacientes/nuevo')"
+              class="flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium text-sm transition-colors"
+            >
+              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zM4 19.235v-.11a6.375 6.375 0 0112.75 0v.109A12.318 12.318 0 0110.374 21c-2.331 0-4.512-.645-6.374-1.766z"/>
+              </svg>
+              Nuevo Paciente
+            </button>
+          }
           <button
             (click)="navigateTo('/intranet/citas')"
             class="flex items-center gap-2 px-5 py-2.5 bg-gray-700 hover:bg-gray-600 text-white rounded-lg font-medium text-sm transition-colors"
@@ -111,35 +132,144 @@ import { EstadoCita } from '../citas/models/cita.model';
             </svg>
             Ver Citas del Día
           </button>
+          @if (esOdontologo()) {
+            <button
+              (click)="navigateTo('/intranet/atencion')"
+              class="flex items-center gap-2 px-5 py-2.5 bg-green-700 hover:bg-green-600 text-white rounded-lg font-medium text-sm transition-colors"
+            >
+              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25z"/>
+              </svg>
+              Registrar Atención
+            </button>
+          }
         </div>
       </div>
 
-      <!-- Recent Activity -->
+      <!-- Citas del Día -->
       <div>
-        <h2 class="text-lg font-semibold text-white mb-4">Últimas Citas del Día</h2>
-        @if (ultimasCitas().length === 0) {
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-lg font-semibold text-white">
+            {{ esOdontologo() ? 'Mi Agenda de Hoy' : 'Agenda del Día' }}
+          </h2>
+          @if (hayMasCitas()) {
+            <button
+              (click)="navigateTo('/intranet/citas')"
+              class="text-xs text-purple-400 hover:text-purple-300 transition-colors"
+            >
+              Ver todas ({{ citasDelDia() }})
+            </button>
+          }
+        </div>
+        @if (isLoading()) {
+          <p class="text-gray-500 text-sm">Cargando citas...</p>
+        } @else if (ultimasCitas().length === 0) {
           <p class="text-gray-500 text-sm">No hay citas registradas para hoy.</p>
         } @else {
           <div class="bg-gray-900 border border-gray-700 rounded-xl overflow-hidden">
             <div class="divide-y divide-gray-800">
               @for (cita of ultimasCitas(); track cita.id) {
                 <div class="flex items-center justify-between px-5 py-4">
-                  <div class="flex items-center gap-4">
+                  <div class="flex items-center gap-4 min-w-0">
                     <span class="text-sm font-mono text-gray-300 w-14 shrink-0">{{ cita.hora }}</span>
-                    <span class="text-sm text-white">{{ cita.pacienteNombre }}</span>
+                    <div class="min-w-0">
+                      <p class="text-sm text-white truncate">{{ cita.pacienteNombre }}</p>
+                      @if (!esOdontologo() && cita.odontologoNombre) {
+                        <p class="text-xs text-gray-500 truncate">Dr. {{ cita.odontologoNombre }}</p>
+                      }
+                    </div>
                   </div>
-                  <span
-                    class="text-xs font-medium px-2.5 py-1 rounded-full"
-                    [class]="getBadgeClass(cita.estado)"
-                  >
-                    {{ cita.estado }}
-                  </span>
+                  <div class="flex items-center gap-3 shrink-0">
+                    <span
+                      class="text-xs font-medium px-2.5 py-1 rounded-full"
+                      [class]="getBadgeClass(cita.estado)"
+                    >
+                      {{ cita.estado }}
+                    </span>
+                    @if ((esOdontologo() || esRecepcionista()) && cita.estado === 'PENDIENTE') {
+                      <button
+                        (click)="navigateTo('/intranet/citas')"
+                        class="text-xs text-purple-400 hover:text-purple-300 transition-colors whitespace-nowrap"
+                      >
+                        Gestionar
+                      </button>
+                    }
+                  </div>
                 </div>
               }
             </div>
           </div>
         }
       </div>
+
+      <!-- Reportes por Odontólogo (solo Recepcionista) -->
+      @if (esRecepcionista()) {
+        <div>
+          <h2 class="text-lg font-semibold text-white mb-4">Reportes por Odontólogo</h2>
+          @if (isLoadingReportes()) {
+            <p class="text-gray-500 text-sm">Cargando reportes...</p>
+          } @else {
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+              @for (odontologo of reportesOdontologos(); track odontologo.id) {
+                <div class="bg-gray-900 border border-gray-700 rounded-xl overflow-hidden flex flex-col">
+                  <!-- Cabecera del odontólogo -->
+                  <div class="flex items-center gap-3 px-5 py-4 border-b border-gray-800">
+                    <div class="w-9 h-9 rounded-full bg-blue-500/20 flex items-center justify-center shrink-0">
+                      <svg class="w-5 h-5 text-blue-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/>
+                      </svg>
+                    </div>
+                    <div class="min-w-0 flex-1">
+                      <p class="text-sm font-semibold text-white truncate">Dr. {{ odontologo.nombre }}</p>
+                      <p class="text-xs text-gray-400">
+                        {{ odontologo.reportes.length }} reporte{{ odontologo.reportes.length !== 1 ? 's' : '' }}
+                      </p>
+                    </div>
+                    <span
+                      class="text-xs font-medium px-2 py-0.5 rounded-full shrink-0"
+                      [class]="odontologo.reportes.length > 0 ? 'bg-green-500/20 text-green-300' : 'bg-gray-700 text-gray-400'"
+                    >
+                      {{ odontologo.reportes.length > 0 ? 'Activo' : 'Sin reportes' }}
+                    </span>
+                  </div>
+
+                  <!-- Lista de reportes -->
+                  @if (odontologo.reportes.length === 0) {
+                    <div class="flex-1 flex items-center justify-center py-8 px-5">
+                      <div class="text-center">
+                        <svg class="w-8 h-8 text-gray-600 mx-auto mb-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/>
+                        </svg>
+                        <p class="text-sm text-gray-500">Sin reportes registrados</p>
+                      </div>
+                    </div>
+                  } @else {
+                    <div class="divide-y divide-gray-800 overflow-y-auto max-h-64">
+                      @for (reporte of odontologo.reportes.slice(0, 6); track reporte.id) {
+                        <div class="px-5 py-3">
+                          <div class="flex items-start justify-between gap-2">
+                            <p class="text-sm text-white truncate">{{ reporte.pacienteNombre }}</p>
+                            <span class="text-xs text-gray-500 shrink-0">{{ reporte.fecha }}</span>
+                          </div>
+                          <p class="text-xs text-gray-400 truncate mt-0.5">{{ reporte.diagnostico }}</p>
+                          <p class="text-xs text-blue-400/70 truncate">{{ reporte.tratamiento }}</p>
+                        </div>
+                      }
+                    </div>
+                    @if (odontologo.reportes.length > 6) {
+                      <div class="px-5 py-3 border-t border-gray-800 text-center">
+                        <span class="text-xs text-gray-500">
+                          + {{ odontologo.reportes.length - 6 }} reporte(s) más
+                        </span>
+                      </div>
+                    }
+                  }
+                </div>
+              }
+            </div>
+          }
+        </div>
+      }
     </div>
   `,
   styles: `
@@ -148,51 +278,79 @@ import { EstadoCita } from '../citas/models/cita.model';
     }
   `
 })
-export class DashboardComponent {
+export class DashboardComponent implements OnInit {
   private readonly authService = inject(AuthService);
-  private readonly pacienteService = inject(PacienteService);
-  private readonly citaService = inject(CitaService);
-  private readonly atencionService = inject(AtencionService);
+  private readonly dashboardService = inject(DashboardService);
   private readonly router = inject(Router);
 
   private readonly hoy = new Date().toISOString().split('T')[0];
 
-  readonly nombreUsuario = computed(() => {
+  readonly isLoading = signal(true);
+  readonly isLoadingReportes = signal(true);
+  private readonly citasHoy = signal<CitaDashboard[]>([]);
+
+  readonly totalPacientes = signal(0);
+  readonly reportesOdontologos = signal<OdontologoConReportes[]>([]);
+
+  readonly esOdontologo = computed(() =>
+    this.authService.currentUser()?.rol === UserRole.ODONTOLOGO
+  );
+  readonly esRecepcionista = computed(() =>
+    this.authService.currentUser()?.rol === UserRole.RECEPCIONISTA
+  );
+
+  readonly citasDelDia = computed(() => this.citasHoy().length);
+  readonly citasPendientes = computed(() =>
+    this.citasHoy().filter(c => c.estado === EstadoCita.PENDIENTE || c.estado === EstadoCita.REAGENDADO).length
+  );
+  readonly atencionesRealizadas = computed(() =>
+    this.citasHoy().filter(c => c.estado === EstadoCita.ATENDIDO).length
+  );
+  readonly citasCanceladas = computed(() =>
+    this.citasHoy().filter(c => c.estado === EstadoCita.CANCELADO).length
+  );
+  readonly ultimasCitas = computed(() =>
+    [...this.citasHoy()].sort((a, b) => a.hora.localeCompare(b.hora)).slice(0, 10)
+  );
+  readonly hayMasCitas = computed(() => this.citasHoy().length > 10);
+
+  readonly gridClass = computed(() => {
+    const cols = this.esRecepcionista() ? 'lg:grid-cols-5' : 'lg:grid-cols-4';
+    const pulse = this.isLoading() ? 'animate-pulse' : '';
+    return `grid grid-cols-1 sm:grid-cols-2 ${cols} gap-5 ${pulse}`.trim();
+  });
+
+  readonly nombreUsuario = computed(() => this.authService.currentUser()?.nombreCompleto ?? 'Usuario');
+
+  readonly fechaActual = computed(() =>
+    new Date().toLocaleDateString('es-PE', {
+      weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+    }).replace(/^\w/, c => c.toUpperCase())
+  );
+
+  ngOnInit(): void {
     const user = this.authService.currentUser();
-    return user?.nombreCompleto ?? 'Usuario';
-  });
+    const odontologoId = user?.rol === UserRole.ODONTOLOGO ? user.id : undefined;
 
-  readonly fechaActual = computed(() => {
-    const fecha = new Date();
-    return fecha.toLocaleDateString('es-PE', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    }).replace(/^\w/, c => c.toUpperCase());
-  });
+    this.dashboardService.cargar(this.hoy, odontologoId).subscribe({
+      next: (data) => {
+        this.totalPacientes.set(data.totalPacientes);
+        this.citasHoy.set(data.citas);
+        this.isLoading.set(false);
+      },
+      error: () => this.isLoading.set(false)
+    });
 
-  readonly totalPacientes = computed(() => {
-    return this.pacienteService.listar().length;
-  });
-
-  readonly citasDelDia = computed(() => {
-    return this.citaService.listarPorFecha(this.hoy).length;
-  });
-
-  readonly citasPendientes = computed(() => {
-    return this.citaService.listarPorFecha(this.hoy)
-      .filter(c => c.estado === EstadoCita.PENDIENTE || c.estado === EstadoCita.REAGENDADO)
-      .length;
-  });
-
-  readonly atencionesRealizadas = computed(() => {
-    return this.atencionService.listarNotasClinicas().length;
-  });
-
-  readonly ultimasCitas = computed(() => {
-    return this.citaService.listarPorFecha(this.hoy).slice(0, 5);
-  });
+    if (user?.rol === UserRole.RECEPCIONISTA) {
+      this.dashboardService.cargarReportesOdontologos().subscribe({
+        next: (data) => {
+          this.reportesOdontologos.set(data);
+          this.isLoadingReportes.set(false);
+        },
+        error: () => this.isLoadingReportes.set(false)
+      });
+    }
+  }
 
   navigateTo(path: string): void {
     this.router.navigate([path]);

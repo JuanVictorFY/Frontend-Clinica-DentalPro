@@ -29,10 +29,13 @@
       </div>
 
       <!-- Actions -->
-      <div class="flex items-center gap-4">
-        <a routerLink="/login" class="text-sm font-medium text-white/70 hover:text-white transition-all duration-300 hidden sm:block">
-          Iniciar Sesión
-        </a>
+      <div class="flex items-center gap-3">
+        <button type="button" (click)="authModal.open('login')" class="text-sm font-medium text-white/70 hover:text-white transition-all duration-300 hidden sm:block cursor-pointer">
+          Iniciar Sesi&oacute;n
+        </button>
+        <button type="button" (click)="authModal.open('registro')" class="text-sm font-semibold text-blue-400 hover:text-blue-300 transition-all duration-300 hidden sm:block cursor-pointer">
+          Registrarse
+        </button>
         <a routerLink="/contacto" class="border border-blue-400 text-blue-400 px-4 py-2 rounded-full text-sm font-semibold hover:bg-blue-600 hover:text-white hover:border-blue-600 hover:shadow-lg hover:shadow-blue-500/30 active:scale-95 transition-all duration-300">
           Agendar Cita
         </a>
