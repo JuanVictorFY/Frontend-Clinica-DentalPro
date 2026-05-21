@@ -26,3 +26,4 @@ export class TratamientoService {
     return this.http.delete<void>(`${API}/tratamientos/${id}`);
   }
 }
+
