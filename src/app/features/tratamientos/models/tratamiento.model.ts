@@ -13,3 +13,4 @@ export interface TratamientoRequest {
   duracionMinutos: number;
 }
 
+
