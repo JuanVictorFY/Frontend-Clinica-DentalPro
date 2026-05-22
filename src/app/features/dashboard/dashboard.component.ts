@@ -4,10 +4,12 @@ import { AuthService } from '../../core/services/auth.service';
 import { DashboardService, CitaDashboard, OdontologoConReportes } from './dashboard.service';
 import { EstadoCita } from '../citas/models/cita.model';
 import { UserRole } from '../../core/models/user.model';
+import { AdminChartsComponent } from './components/admin-charts.component';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
+  imports: [AdminChartsComponent],
   template: `
     <div class="space-y-8">
       <!-- Header -->
@@ -202,6 +204,19 @@ import { UserRole } from '../../core/models/user.model';
         }
       </div>
 
+      <!-- Gráficos (solo Administrador) -->
+      @if (esAdmin()) {
+        <div>
+          <div class="flex items-center gap-3 mb-5">
+            <h2 class="text-lg font-semibold text-white">Estadísticas del Sistema</h2>
+            <span class="text-xs bg-blue-500/15 text-blue-400 border border-blue-500/30 px-2.5 py-0.5 rounded-full">
+              Tiempo real
+            </span>
+          </div>
+          <app-admin-charts />
+        </div>
+      }
+
       <!-- Reportes por Odontólogo (solo Recepcionista) -->
       @if (esRecepcionista()) {
         <div>
@@ -297,6 +312,9 @@ export class DashboardComponent implements OnInit {
   );
   readonly esRecepcionista = computed(() =>
     this.authService.currentUser()?.rol === UserRole.RECEPCIONISTA
+  );
+  readonly esAdmin = computed(() =>
+    this.authService.currentUser()?.rol === UserRole.ADMINISTRADOR
   );
 
   readonly citasDelDia = computed(() => this.citasHoy().length);

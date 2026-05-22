@@ -183,7 +183,7 @@ export class UsuariosComponent implements OnInit {
           });
           this.toast.success('Usuario eliminado correctamente');
         },
-        error: () => this.toast.error('No se pudo eliminar el usuario')
+        error: (err) => this.toast.error(err?.error?.message || 'No se pudo eliminar el usuario')
       });
     }
   }

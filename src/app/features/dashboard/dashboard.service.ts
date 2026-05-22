@@ -33,9 +33,22 @@ export interface OdontologoConReportes {
   reportes: ReporteResumen[];
 }
 
+export interface AdminStats {
+  porEstado: Record<string, number>;
+  porOdontologo: { nombre: string; total: number }[];
+  ultimos7Dias: { fecha: string; dia: string; total: number }[];
+  totalPacientes: number;
+  totalCitasMes: number;
+  mes: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class DashboardService {
   private readonly http = inject(HttpClient);
+
+  cargarStatsAdmin(): Observable<AdminStats> {
+    return this.http.get<AdminStats>(`${API}/stats/admin`);
+  }
 
   cargarReportesOdontologos(): Observable<OdontologoConReportes[]> {
     return forkJoin({
