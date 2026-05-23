@@ -1,19 +1,24 @@
 import { Component, inject, signal, computed, OnInit, input } from '@angular/core';
+import { ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { PacienteService } from '../services/paciente.service';
 import { CitaService } from '../../citas/services/cita.service';
 import { AtencionService } from '../../atencion/services/atencion.service';
+import { HistorialClinicoService } from '../services/historial-clinico.service';
 import { Paciente } from '../models/paciente.model';
+import { HistorialClinico } from '../models/historial-clinico.model';
 import { Cita, EstadoCita } from '../../citas/models/cita.model';
 import { NotaClinica } from '../../atencion/models/atencion.model';
+import { ToastService } from '../../../shared/services/toast.service';
 
 @Component({
   selector: 'app-paciente-detalle',
   standalone: true,
+  imports: [ReactiveFormsModule],
   template: `
     <div class="space-y-6">
-      <!-- Header con botones -->
+      <!-- Header -->
       <div class="flex items-center gap-4">
         <button
           (click)="volverLista()"
@@ -46,6 +51,7 @@ import { NotaClinica } from '../../atencion/models/atencion.model';
           </svg>
         </div>
       } @else if (paciente()) {
+
         <!-- Datos personales -->
         <div class="p-6 bg-gray-900 rounded-xl border border-gray-700">
           <h2 class="text-lg font-semibold text-white mb-4">Datos del Paciente</h2>
@@ -71,6 +77,111 @@ import { NotaClinica } from '../../atencion/models/atencion.model';
               <p class="text-white font-medium mt-1">{{ paciente()!.email }}</p>
             </div>
           </div>
+        </div>
+
+        <!-- Ficha Médica -->
+        <div class="p-6 bg-gray-900 rounded-xl border border-gray-700">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg font-semibold text-white">Ficha Médica</h2>
+            @if (!editandoHistorial()) {
+              <button
+                (click)="iniciarEdicionHistorial()"
+                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/10 transition-colors cursor-pointer"
+              >
+                <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Z" />
+                </svg>
+                Editar ficha
+              </button>
+            }
+          </div>
+
+          @if (editandoHistorial()) {
+            <form [formGroup]="historialForm" (ngSubmit)="guardarHistorial()" class="space-y-4">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-xs text-gray-400 uppercase tracking-wider mb-1">Grupo Sanguíneo</label>
+                  <input
+                    type="text"
+                    formControlName="grupoSanguineo"
+                    placeholder="Ej: O+, A-, B+"
+                    class="w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-600 text-white placeholder-gray-500 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  />
+                </div>
+                <div>
+                  <label class="block text-xs text-gray-400 uppercase tracking-wider mb-1">Alergias</label>
+                  <textarea
+                    formControlName="alergias"
+                    rows="2"
+                    placeholder="Ej: Penicilina, látex..."
+                    class="w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-600 text-white placeholder-gray-500 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-none"
+                  ></textarea>
+                </div>
+                <div>
+                  <label class="block text-xs text-gray-400 uppercase tracking-wider mb-1">Condiciones Médicas</label>
+                  <textarea
+                    formControlName="condicionesMedicas"
+                    rows="2"
+                    placeholder="Ej: Diabetes, hipertensión..."
+                    class="w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-600 text-white placeholder-gray-500 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-none"
+                  ></textarea>
+                </div>
+                <div>
+                  <label class="block text-xs text-gray-400 uppercase tracking-wider mb-1">Medicamentos Actuales</label>
+                  <textarea
+                    formControlName="medicamentosActuales"
+                    rows="2"
+                    placeholder="Ej: Metformina, enalapril..."
+                    class="w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-600 text-white placeholder-gray-500 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-none"
+                  ></textarea>
+                </div>
+              </div>
+              <div class="flex items-center gap-3 pt-1">
+                <button
+                  type="submit"
+                  [disabled]="guardandoHistorial()"
+                  class="flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium transition-colors cursor-pointer disabled:opacity-50"
+                >
+                  @if (guardandoHistorial()) {
+                    <svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                    </svg>
+                  }
+                  Guardar
+                </button>
+                <button
+                  type="button"
+                  (click)="cancelarEdicionHistorial()"
+                  class="px-4 py-2 rounded-lg text-gray-300 border border-gray-600 hover:bg-gray-800 text-sm font-medium transition-colors cursor-pointer"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </form>
+          } @else {
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div>
+                <p class="text-xs text-gray-400 uppercase tracking-wider">Grupo sanguíneo</p>
+                <p class="text-white font-medium mt-1">{{ historial()?.grupoSanguineo || '—' }}</p>
+              </div>
+              <div>
+                <p class="text-xs text-gray-400 uppercase tracking-wider">Alergias</p>
+                <p class="text-white text-sm mt-1">{{ historial()?.alergias || '—' }}</p>
+              </div>
+              <div>
+                <p class="text-xs text-gray-400 uppercase tracking-wider">Condiciones médicas</p>
+                <p class="text-white text-sm mt-1">{{ historial()?.condicionesMedicas || '—' }}</p>
+              </div>
+              <div>
+                <p class="text-xs text-gray-400 uppercase tracking-wider">Medicamentos</p>
+                <p class="text-white text-sm mt-1">{{ historial()?.medicamentosActuales || '—' }}</p>
+              </div>
+            </div>
+            @if (historial()?.fechaActualizacion) {
+              <p class="text-xs text-gray-500 mt-4">Última actualización: {{ historial()!.fechaActualizacion }}</p>
+            }
+          }
         </div>
 
         <!-- Indicadores resumen -->
@@ -170,6 +281,7 @@ import { NotaClinica } from '../../atencion/models/atencion.model';
             </div>
           }
         </div>
+
       } @else {
         <div class="flex flex-col items-center justify-center py-12 gap-3">
           <svg class="w-12 h-12 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -190,9 +302,12 @@ import { NotaClinica } from '../../atencion/models/atencion.model';
 })
 export class PacienteDetalleComponent implements OnInit {
   private readonly router = inject(Router);
+  private readonly fb = inject(FormBuilder);
   private readonly pacienteService = inject(PacienteService);
   private readonly citaService = inject(CitaService);
   private readonly atencionService = inject(AtencionService);
+  private readonly historialService = inject(HistorialClinicoService);
+  private readonly toast = inject(ToastService);
 
   readonly id = input<string>('');
 
@@ -200,6 +315,16 @@ export class PacienteDetalleComponent implements OnInit {
   readonly paciente = signal<Paciente | undefined>(undefined);
   readonly citas = signal<Cita[]>([]);
   readonly notas = signal<NotaClinica[]>([]);
+  readonly historial = signal<HistorialClinico | undefined>(undefined);
+  readonly editandoHistorial = signal(false);
+  readonly guardandoHistorial = signal(false);
+
+  readonly historialForm: FormGroup = this.fb.group({
+    grupoSanguineo: [''],
+    alergias: [''],
+    condicionesMedicas: [''],
+    medicamentosActuales: ['']
+  });
 
   readonly totalCitas = computed(() => this.citas().length);
   readonly totalNotas = computed(() => this.notas().length);
@@ -218,24 +343,58 @@ export class PacienteDetalleComponent implements OnInit {
     forkJoin({
       paciente: this.pacienteService.obtenerPorId(pacienteId),
       citas: this.citaService.listarPorPaciente(pacienteId),
-      notas: this.atencionService.listarPorPaciente(pacienteId)
+      notas: this.atencionService.listarPorPaciente(pacienteId),
+      historial: this.historialService.obtener(pacienteId)
     }).subscribe({
-      next: ({ paciente, citas, notas }) => {
+      next: ({ paciente, citas, notas, historial }) => {
         this.paciente.set(paciente);
         this.citas.set(citas);
         this.notas.set(notas);
+        this.historial.set(historial);
         this.isLoading.set(false);
       },
       error: () => this.isLoading.set(false)
     });
   }
 
+  iniciarEdicionHistorial(): void {
+    const h = this.historial();
+    this.historialForm.patchValue({
+      grupoSanguineo: h?.grupoSanguineo ?? '',
+      alergias: h?.alergias ?? '',
+      condicionesMedicas: h?.condicionesMedicas ?? '',
+      medicamentosActuales: h?.medicamentosActuales ?? ''
+    });
+    this.editandoHistorial.set(true);
+  }
+
+  cancelarEdicionHistorial(): void {
+    this.editandoHistorial.set(false);
+  }
+
+  guardarHistorial(): void {
+    this.guardandoHistorial.set(true);
+    const pacienteId = Number(this.id());
+    this.historialService.guardar(pacienteId, this.historialForm.value).subscribe({
+      next: (resultado) => {
+        this.historial.set(resultado);
+        this.editandoHistorial.set(false);
+        this.guardandoHistorial.set(false);
+        this.toast.success('Ficha médica actualizada');
+      },
+      error: () => {
+        this.guardandoHistorial.set(false);
+        this.toast.error('Error al guardar la ficha médica');
+      }
+    });
+  }
+
   getBadgeClass(estado: EstadoCita): string {
     const base = 'inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium';
     switch (estado) {
-      case EstadoCita.PENDIENTE: return `${base} bg-yellow-500/20 text-yellow-400`;
-      case EstadoCita.ATENDIDO: return `${base} bg-green-500/20 text-green-400`;
-      case EstadoCita.CANCELADO: return `${base} bg-red-500/20 text-red-400`;
+      case EstadoCita.PENDIENTE:  return `${base} bg-yellow-500/20 text-yellow-400`;
+      case EstadoCita.ATENDIDO:   return `${base} bg-green-500/20 text-green-400`;
+      case EstadoCita.CANCELADO:  return `${base} bg-red-500/20 text-red-400`;
       case EstadoCita.REAGENDADO: return `${base} bg-blue-500/20 text-blue-400`;
       default: return base;
     }

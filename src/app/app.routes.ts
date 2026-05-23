@@ -149,6 +149,20 @@ export const routes: Routes = [
         ]
       },
       {
+        path: 'tratamientos',
+        canActivate: [roleGuard],
+        data: { roles: [UserRole.ADMINISTRADOR] },
+        loadComponent: () =>
+          import('./features/tratamientos/tratamientos.component').then(m => m.TratamientosComponent),
+      },
+      {
+        path: 'pagos',
+        canActivate: [roleGuard],
+        data: { roles: [UserRole.ADMINISTRADOR, UserRole.RECEPCIONISTA] },
+        loadComponent: () =>
+          import('./features/pagos/pagos.component').then(m => m.PagosComponent),
+      },
+      {
         path: 'acceso-denegado',
         loadComponent: () =>
           import('./features/auth/access-denied/access-denied.component').then(m => m.AccessDeniedComponent)
