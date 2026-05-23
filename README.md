@@ -155,15 +155,4 @@ ODONTOLOGO
 
 ---
 
-## Autoría
 
-Proyecto diseñado, desarrollado e implementado por:
-
-- **Desarrolladora:** Sheila JPM
-- **LinkedIn:** [Sheila Jacqueline Principe Merino](https://www.linkedin.com/in/sheila-jacqueline-principe-merino-1579802aa/)
-- **GitHub:** [@SHEILAJPM](https://github.com/SHEILAJPM)
-- **Contacto:** [principemerinosheila@gmail.com](mailto:principemerinosheila@gmail.com)
-
----
-
-*Proyecto académico — Ingeniería de Sistemas e Informática.*
