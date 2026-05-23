@@ -4,7 +4,9 @@ import { Router } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { CitaService } from '../services/cita.service';
 import { PacienteService } from '../../pacientes/services/paciente.service';
+import { TratamientoService } from '../../tratamientos/services/tratamiento.service';
 import { Paciente } from '../../pacientes/models/paciente.model';
+import { Tratamiento } from '../../tratamientos/models/tratamiento.model';
 import { Odontologo } from '../models/cita.model';
 import { ToastService } from '../../../shared/services/toast.service';
 import { AuthService } from '../../../core/services/auth.service';
@@ -129,6 +131,26 @@ import { UserRole } from '../../../core/models/user.model';
             }
           </div>
 
+          <!-- Tipo de tratamiento / consulta -->
+          <div>
+            <label for="tipoCita" class="block text-sm font-medium text-gray-300 mb-1">
+              Tipo de tratamiento o consulta
+              <span class="text-gray-500 font-normal">(opcional — rellena el motivo)</span>
+            </label>
+            <select
+              id="tipoCita"
+              (change)="onTipoChange($event)"
+              class="w-full px-4 py-2.5 rounded-lg bg-gray-800 border border-gray-600 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+            >
+              <option value="">— Seleccionar tipo —</option>
+              @for (t of tratamientos(); track t.id) {
+                <option [value]="t.id + '|' + t.nombre + '|' + t.precio">
+                  {{ t.nombre }} — S/ {{ t.precio.toFixed(2) }}
+                </option>
+              }
+            </select>
+          </div>
+
           <!-- Motivo -->
           <div>
             <label for="motivo" class="block text-sm font-medium text-gray-300 mb-1">
@@ -184,6 +206,7 @@ export class CitaFormComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly citaService = inject(CitaService);
   private readonly pacienteService = inject(PacienteService);
+  private readonly tratamientoService = inject(TratamientoService);
   private readonly authService = inject(AuthService);
   private readonly toast = inject(ToastService);
 
@@ -193,6 +216,8 @@ export class CitaFormComponent implements OnInit {
   readonly esEdicion = signal(false);
   readonly pacientes = signal<Paciente[]>([]);
   readonly odontologos = signal<Odontologo[]>([]);
+  readonly tratamientos = signal<Tratamiento[]>([]);
+  private selectedTratamientoId: number | null = null;
 
   readonly esOdontologo = computed(() =>
     this.authService.currentUser()?.rol === UserRole.ODONTOLOGO
@@ -209,6 +234,11 @@ export class CitaFormComponent implements OnInit {
   });
 
   ngOnInit(): void {
+    this.tratamientoService.listar().subscribe({
+      next: (ts) => this.tratamientos.set(ts),
+      error: () => {}
+    });
+
     const id = this.citaId();
     const soyDoctor = this.esOdontologo();
 
@@ -258,6 +288,17 @@ export class CitaFormComponent implements OnInit {
     }
   }
 
+  onTipoChange(event: Event): void {
+    const value = (event.target as HTMLSelectElement).value;
+    if (value) {
+      const [id, nombre] = value.split('|');
+      this.selectedTratamientoId = Number(id);
+      this.citaForm.get('motivo')?.setValue(nombre);
+    } else {
+      this.selectedTratamientoId = null;
+    }
+  }
+
   isFieldInvalid(fieldName: string): boolean {
     const control = this.citaForm.get(fieldName);
     return !!(control && control.invalid && control.touched);
@@ -277,6 +318,7 @@ export class CitaFormComponent implements OnInit {
       fecha: formValue.fecha,
       hora: formValue.hora,
       motivo: formValue.motivo,
+      tratamientoId: this.selectedTratamientoId,
     };
 
     const obs = this.esEdicion()

@@ -23,6 +23,7 @@ export interface CitaRequest {
   fecha: string;
   hora: string;
   motivo: string;
+  tratamientoId?: number | null;
 }
 
 export interface Odontologo {

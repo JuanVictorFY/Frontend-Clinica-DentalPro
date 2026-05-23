@@ -1,11 +1,18 @@
 import { Component, inject, signal, computed, OnInit } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { PagoService } from './services/pago.service';
-import { Pago, EstadoPago } from './models/pago.model';
+import { Pago, EstadoPago, MetodoPago } from './models/pago.model';
 import { ToastService } from '../../shared/services/toast.service';
+
+interface CobroForm {
+  monto: number | null;
+  metodoPago: MetodoPago;
+}
 
 @Component({
   selector: 'app-pagos',
   standalone: true,
+  imports: [FormsModule],
   template: `
     <div class="space-y-6">
       <!-- Header -->
@@ -59,29 +66,64 @@ import { ToastService } from '../../shared/services/toast.service';
               </thead>
               <tbody>
                 @for (pago of pagos(); track pago.id) {
-                  <tr class="bg-gray-900 border-t border-gray-700 hover:bg-gray-800/70 transition-colors">
+                  <tr class="bg-gray-900 border-t border-gray-700 hover:bg-gray-800/50 transition-colors">
                     <td class="px-6 py-4 text-gray-200 font-medium">{{ pago.pacienteNombre }}</td>
                     <td class="px-6 py-4 text-gray-300">{{ pago.odontologoNombre }}</td>
                     <td class="px-6 py-4 text-gray-300">{{ pago.citaFecha }}</td>
-                    <td class="px-6 py-4">
-                      <span class="inline-flex items-center gap-1 text-gray-300">
-                        {{ pago.metodoPago }}
-                      </span>
-                    </td>
+                    <td class="px-6 py-4 text-gray-300">{{ pago.metodoPago }}</td>
                     <td class="px-6 py-4 text-right">
-                      <span class="text-emerald-400 font-semibold">S/. {{ pago.monto.toFixed(2) }}</span>
+                      @if (pago.estado === 'PAGADO') {
+                        <span class="text-emerald-400 font-semibold">S/. {{ pago.monto.toFixed(2) }}</span>
+                      } @else {
+                        <span class="text-gray-500 text-xs italic">pendiente</span>
+                      }
                     </td>
                     <td class="px-6 py-4 text-center">
                       <span [class]="getBadgeClass(pago.estado)">{{ pago.estado }}</span>
                     </td>
                     <td class="px-6 py-4 text-center">
                       @if (pago.estado === 'PENDIENTE') {
-                        <button
-                          (click)="marcarPagado(pago)"
-                          class="px-3 py-1.5 rounded-lg text-xs font-medium bg-emerald-600 hover:bg-emerald-700 text-white transition-colors cursor-pointer"
-                        >
-                          Marcar pagado
-                        </button>
+                        @if (cobrando() === pago.id) {
+                          <!-- Formulario inline de cobro -->
+                          <div class="flex items-center gap-2 justify-center flex-wrap">
+                            <input
+                              type="number"
+                              [(ngModel)]="cobroForm.monto"
+                              min="0.01"
+                              step="0.10"
+                              placeholder="S/. 0.00"
+                              class="w-24 px-2 py-1.5 rounded-lg bg-gray-800 border border-gray-600 text-white text-xs focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                            />
+                            <select
+                              [(ngModel)]="cobroForm.metodoPago"
+                              class="px-2 py-1.5 rounded-lg bg-gray-800 border border-gray-600 text-white text-xs focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                            >
+                              <option value="EFECTIVO">Efectivo</option>
+                              <option value="TARJETA">Tarjeta</option>
+                              <option value="TRANSFERENCIA">Transferencia</option>
+                            </select>
+                            <button
+                              (click)="confirmarCobro(pago)"
+                              [disabled]="!cobroForm.monto || cobroForm.monto <= 0 || procesando()"
+                              class="px-3 py-1.5 rounded-lg text-xs font-medium bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white transition-colors cursor-pointer"
+                            >
+                              {{ procesando() ? '...' : 'Cobrar' }}
+                            </button>
+                            <button
+                              (click)="cancelarCobro()"
+                              class="px-3 py-1.5 rounded-lg text-xs font-medium bg-gray-700 hover:bg-gray-600 text-gray-300 transition-colors cursor-pointer"
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        } @else {
+                          <button
+                            (click)="iniciarCobro(pago.id)"
+                            class="px-3 py-1.5 rounded-lg text-xs font-medium bg-yellow-600 hover:bg-yellow-500 text-white transition-colors cursor-pointer"
+                          >
+                            Registrar cobro
+                          </button>
+                        }
                       } @else {
                         <span class="text-gray-600 text-xs">—</span>
                       }
@@ -102,7 +144,11 @@ export class PagosComponent implements OnInit {
   private readonly toast = inject(ToastService);
 
   readonly isLoading = signal(true);
+  readonly procesando = signal(false);
   readonly pagos = signal<Pago[]>([]);
+  readonly cobrando = signal<number | null>(null);
+
+  cobroForm: CobroForm = { monto: null, metodoPago: 'EFECTIVO' };
 
   readonly totalPagados = computed(() => this.pagos().filter(p => p.estado === 'PAGADO').length);
   readonly totalPendientes = computed(() => this.pagos().filter(p => p.estado === 'PENDIENTE').length);
@@ -112,22 +158,39 @@ export class PagosComponent implements OnInit {
     this.cargar();
   }
 
-  marcarPagado(pago: Pago): void {
-    this.service.cambiarEstado(pago.id, 'PAGADO').subscribe({
+  iniciarCobro(pagoId: number): void {
+    this.cobrando.set(pagoId);
+    this.cobroForm = { monto: null, metodoPago: 'EFECTIVO' };
+  }
+
+  cancelarCobro(): void {
+    this.cobrando.set(null);
+  }
+
+  confirmarCobro(pago: Pago): void {
+    if (!this.cobroForm.monto || this.cobroForm.monto <= 0) return;
+
+    this.procesando.set(true);
+    this.service.cobrar(pago.id, this.cobroForm.monto, this.cobroForm.metodoPago).subscribe({
       next: (updated) => {
         this.pagos.update(list => list.map(p => p.id === updated.id ? updated : p));
-        this.toast.success('Pago marcado como pagado');
+        this.cobrando.set(null);
+        this.procesando.set(false);
+        this.toast.success(`Cobro registrado: S/. ${this.cobroForm.monto?.toFixed(2)}`);
       },
-      error: () => this.toast.error('Error al actualizar el pago')
+      error: () => {
+        this.toast.error('Error al registrar el cobro');
+        this.procesando.set(false);
+      }
     });
   }
 
   getBadgeClass(estado: EstadoPago): string {
     const base = 'inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium';
     switch (estado) {
-      case 'PAGADO':   return `${base} bg-emerald-500/20 text-emerald-400`;
+      case 'PAGADO':    return `${base} bg-emerald-500/20 text-emerald-400`;
       case 'PENDIENTE': return `${base} bg-yellow-500/20 text-yellow-400`;
-      case 'ANULADO':  return `${base} bg-red-500/20 text-red-400`;
+      case 'ANULADO':   return `${base} bg-red-500/20 text-red-400`;
       default: return base;
     }
   }

@@ -67,6 +67,13 @@ export class DashboardService {
     );
   }
 
+  cargarMisReportes(odontologoNombre: string): Observable<ReporteResumen[]> {
+    const nombre = encodeURIComponent(odontologoNombre);
+    return this.http
+      .get<{ content: ReporteResumen[] }>(`${API}/reportes?page=1&size=50&odontologoNombre=${nombre}`)
+      .pipe(map(r => r.content));
+  }
+
   cargar(fecha: string, odontologoId?: number): Observable<DashboardData> {
     const citasUrl = odontologoId
       ? `${API}/citas?fecha=${fecha}&odontologoId=${odontologoId}`

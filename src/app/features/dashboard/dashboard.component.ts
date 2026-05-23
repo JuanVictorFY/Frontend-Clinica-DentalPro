@@ -1,7 +1,7 @@
 import { Component, inject, computed, signal, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
-import { DashboardService, CitaDashboard, OdontologoConReportes } from './dashboard.service';
+import { DashboardService, CitaDashboard, OdontologoConReportes, ReporteResumen } from './dashboard.service';
 import { EstadoCita } from '../citas/models/cita.model';
 import { UserRole } from '../../core/models/user.model';
 import { AdminChartsComponent } from './components/admin-charts.component';
@@ -217,6 +217,48 @@ import { AdminChartsComponent } from './components/admin-charts.component';
         </div>
       }
 
+      <!-- Mis Reportes (solo Odontólogo) -->
+      @if (esOdontologo()) {
+        <div>
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg font-semibold text-white">Mis Reportes</h2>
+            <button
+              (click)="navigateTo('/intranet/reportes')"
+              class="text-xs text-purple-400 hover:text-purple-300 transition-colors"
+            >
+              Ver todos
+            </button>
+          </div>
+          @if (isLoadingMisReportes()) {
+            <p class="text-gray-500 text-sm">Cargando reportes...</p>
+          } @else if (misReportes().length === 0) {
+            <p class="text-gray-500 text-sm">No tienes reportes registrados aún.</p>
+          } @else {
+            <div class="bg-gray-900 border border-gray-700 rounded-xl overflow-hidden">
+              <div class="divide-y divide-gray-800">
+                @for (reporte of misReportes().slice(0, 8); track reporte.id) {
+                  <div class="px-5 py-3">
+                    <div class="flex items-start justify-between gap-4">
+                      <div class="min-w-0">
+                        <p class="text-sm text-white truncate">{{ reporte.pacienteNombre }}</p>
+                        <p class="text-xs text-gray-400 truncate mt-0.5">{{ reporte.diagnostico }}</p>
+                        <p class="text-xs text-blue-400/70 truncate">{{ reporte.tratamiento }}</p>
+                      </div>
+                      <span class="text-xs text-gray-500 shrink-0">{{ reporte.fecha }}</span>
+                    </div>
+                  </div>
+                }
+              </div>
+              @if (misReportes().length > 8) {
+                <div class="px-5 py-3 border-t border-gray-800 text-center">
+                  <span class="text-xs text-gray-500">+ {{ misReportes().length - 8 }} reporte(s) más</span>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      }
+
       <!-- Reportes por Odontólogo (solo Recepcionista) -->
       @if (esRecepcionista()) {
         <div>
@@ -302,10 +344,12 @@ export class DashboardComponent implements OnInit {
 
   readonly isLoading = signal(true);
   readonly isLoadingReportes = signal(true);
+  readonly isLoadingMisReportes = signal(true);
   private readonly citasHoy = signal<CitaDashboard[]>([]);
 
   readonly totalPacientes = signal(0);
   readonly reportesOdontologos = signal<OdontologoConReportes[]>([]);
+  readonly misReportes = signal<ReporteResumen[]>([]);
 
   readonly esOdontologo = computed(() =>
     this.authService.currentUser()?.rol === UserRole.ODONTOLOGO
@@ -366,6 +410,16 @@ export class DashboardComponent implements OnInit {
           this.isLoadingReportes.set(false);
         },
         error: () => this.isLoadingReportes.set(false)
+      });
+    }
+
+    if (user?.rol === UserRole.ODONTOLOGO && user.nombreCompleto) {
+      this.dashboardService.cargarMisReportes(user.nombreCompleto).subscribe({
+        next: (data) => {
+          this.misReportes.set(data);
+          this.isLoadingMisReportes.set(false);
+        },
+        error: () => this.isLoadingMisReportes.set(false)
       });
     }
   }

@@ -43,7 +43,8 @@ export class CitaService {
       odontologoId: request.odontologoId,
       fecha: request.fecha,
       hora: request.hora,
-      motivo: request.motivo
+      motivo: request.motivo,
+      tratamientoId: request.tratamientoId ?? null
     });
   }
 
@@ -53,7 +54,8 @@ export class CitaService {
       odontologoId: request.odontologoId,
       fecha: request.fecha,
       hora: request.hora,
-      motivo: request.motivo
+      motivo: request.motivo,
+      tratamientoId: request.tratamientoId ?? null
     });
   }
 
