@@ -2,31 +2,36 @@
   <img src="public/favicon.svg" width="80" alt="DentalPro Logo">
 </p>
 
-<h1 align="center">DentalPro - Sistema de Gesti&oacute;n Cl&iacute;nica Dental</h1>
+<h1 align="center">DentalPro — Sistema de Gestión Clínica Dental</h1>
 
 <p align="center">
-  <strong>Frontend completo para la gesti&oacute;n interna de una cl&iacute;nica dental</strong><br>
-  Landing page p&uacute;blica + Intranet administrativa con control de acceso por roles
+  <strong>Frontend completo para la gestión interna de una clínica dental</strong><br>
+  Landing page pública + Intranet administrativa con control de acceso por roles
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Angular-21-dd0031?style=flat-square&logo=angular" alt="Angular 21">
+  <img src="https://img.shields.io/badge/Angular-19-dd0031?style=flat-square&logo=angular" alt="Angular">
   <img src="https://img.shields.io/badge/TailwindCSS-4-06b6d4?style=flat-square&logo=tailwindcss" alt="TailwindCSS 4">
-  <img src="https://img.shields.io/badge/TypeScript-5.9-3178c6?style=flat-square&logo=typescript" alt="TypeScript">
-  <img src="https://img.shields.io/badge/Vitest-4-6e9f18?style=flat-square&logo=vitest" alt="Vitest">
+  <img src="https://img.shields.io/badge/TypeScript-5.x-3178c6?style=flat-square&logo=typescript" alt="TypeScript">
 </p>
 
 ---
 
-## Descripci&oacute;n
+## Backend
 
-DentalPro es un sistema web de gesti&oacute;n para cl&iacute;nicas dentales que incluye:
+https://github.com/SHEILAJPM/Backend-Clinica-DentalPro.git
 
-- **P&aacute;ginas p&uacute;blicas** (landing page, servicios, nosotros, contacto) con dise&ntilde;o premium oscuro y animaciones
-- **Intranet administrativa** protegida con autenticaci&oacute;n JWT y control de acceso basado en roles
-- **M&oacute;dulos funcionales** completos: Pacientes, Citas, Atenci&oacute;n, Usuarios y Reportes
+> El frontend consume la API REST del backend (Spring Boot 3.4.5 + PostgreSQL). Debe estar corriendo en `http://localhost:8080` antes de iniciar el frontend.
 
-Todo funciona con datos mock en memoria &mdash; no requiere backend ni servidor externo.
+---
+
+## Descripción
+
+DentalPro es un sistema web de gestión para clínicas dentales que incluye:
+
+- **Páginas públicas** (landing, servicios, nosotros, contacto) con diseño oscuro y animaciones
+- **Intranet administrativa** protegida con autenticación JWT y control de acceso por roles
+- **Módulos funcionales** completos conectados a la API REST
 
 ---
 
@@ -35,73 +40,52 @@ Todo funciona con datos mock en memoria &mdash; no requiere backend ni servidor 
 ```
 src/
 ├── app/
-│   ├── core/              # Servicios, guards, interceptors, modelos
-│   ├── features/          # M&oacute;dulos funcionales (pacientes, citas, etc.)
-│   ├── layouts/           # IntranetLayoutComponent (sidebar + topbar)
-│   ├── pages/             # P&aacute;ginas p&uacute;blicas (home, servicios, nosotros, contacto)
-│   ├── shared/            # Componentes reutilizables (toast, pagination, skeleton, modal)
-│   └── components/        # Navbar y Footer p&uacute;blicos
+│   ├── core/              # Guards, interceptors, servicios de auth, modelos
+│   ├── features/          # Módulos funcionales (pacientes, citas, atencion, tratamientos, pagos, ...)
+│   ├── layouts/           # IntranetLayoutComponent (sidebar + topbar + búsqueda global)
+│   ├── pages/             # Páginas públicas (home, servicios, nosotros, contacto)
+│   ├── shared/            # Toast, confirmación, paginación, skeleton, búsqueda
+│   └── components/        # Navbar y Footer públicos
 ├── styles.css             # TailwindCSS 4 + variables de tema + animaciones
 └── index.html
 ```
 
 ---
 
-## Funcionalidades
+## Módulos de la Intranet
 
-### P&aacute;ginas P&uacute;blicas
-- Landing page con hero, servicios, testimonios, galer&iacute;a y CTA
-- P&aacute;gina de servicios con carrusel animado
-- Secci&oacute;n Nosotros y Contacto
-- Navbar con efecto glassmorphism al scroll
-- Animaciones scroll-triggered con IntersectionObserver
-
-### Intranet (requiere login)
-| M&oacute;dulo | Funcionalidades |
+| Módulo | Funcionalidades |
 |--------|-----------------|
-| **Dashboard** | M&eacute;tricas, acciones r&aacute;pidas, citas del d&iacute;a |
-| **Pacientes** | CRUD completo, historial cl&iacute;nico, validaci&oacute;n DNI |
-| **Citas** | Agenda por fecha, filtros por odont&oacute;logo/estado, m&aacute;quina de estados |
-| **Atenci&oacute;n** | Registro de notas cl&iacute;nicas, finalizaci&oacute;n de citas |
-| **Usuarios** | Gesti&oacute;n de usuarios con roles (Admin, Recepcionista, Odont&oacute;logo) |
-| **Reportes** | Lista de reportes, vista detalle, exportar PDF |
-
-### Caracter&iacute;sticas Transversales
-- Autenticaci&oacute;n mock con JWT (3 usuarios predefinidos)
-- Guards funcionales (auth + roles)
-- Sistema de notificaciones toast
-- Modal de confirmaci&oacute;n personalizado
-- Paginaci&oacute;n en tablas
-- Skeleton loading en listas
-- B&uacute;squeda global en topbar
-- Toggle modo claro/oscuro con persistencia
-- Transiciones de p&aacute;gina (fade)
-- Breadcrumbs din&aacute;micos
-- Sidebar responsive (m&oacute;vil + tablet + desktop)
-- Exportaci&oacute;n de reportes a PDF
+| **Dashboard** | Métricas del día, acciones rápidas, citas pendientes |
+| **Pacientes** | CRUD completo, historial clínico (ficha médica editable + citas + notas) |
+| **Citas** | Agenda por fecha, filtros por odontólogo/estado, cambio de estado |
+| **Atención** | Registro de diagnóstico, tratamiento y notas clínicas |
+| **Usuarios** | Gestión de personal con roles |
+| **Reportes** | Lista paginada, vista detalle, descarga en PDF |
+| **Tratamientos** | Catálogo de tratamientos con precio y duración (solo Admin) |
+| **Pagos** | Registro de cobros, cambio de estado, resumen financiero |
 
 ---
 
 ## Credenciales de Acceso
 
-| Rol | Email | Contrase&ntilde;a | Acceso |
-|-----|-------|------------|--------|
-| Administrador | `admin@dental.com` | `123456` | Todos los m&oacute;dulos |
-| Recepcionista | `recepcion@dental.com` | `123456` | Pacientes, Citas |
-| Odont&oacute;logo | `doctor@dental.com` | `123456` | Citas, Atenci&oacute;n, Reportes |
+| Rol | Email | Contraseña | Módulos disponibles |
+|-----|-------|------------|---------------------|
+| Administrador | `admin@dental.com` | `123456` | Todos |
+| Recepcionista | `recepcion@dental.com` | `123456` | Dashboard, Pacientes, Citas, Pagos |
+| Odontólogo | `doctor@dental.com` | `123456` | Dashboard, Citas, Atención, Reportes |
 
 ---
 
-## Tecnolog&iacute;as
+## Tecnologías
 
-| Categor&iacute;a | Tecnolog&iacute;a |
+| Categoría | Tecnología |
 |-----------|------------|
-| Framework | Angular 21 (Standalone Components, Signals) |
+| Framework | Angular 19 (Standalone Components, Signals) |
 | Estilos | TailwindCSS 4 |
-| Lenguaje | TypeScript 5.9 |
-| Testing | Vitest + @analogjs/vitest-angular |
+| Lenguaje | TypeScript 5.x |
 | Build | Vite (via @angular/build) |
-| SSR | Angular SSR |
+| HTTP | HttpClient + Interceptor JWT |
 
 ---
 
@@ -109,10 +93,11 @@ src/
 
 - Node.js 18+
 - npm 10+
+- Backend corriendo en `http://localhost:8080`
 
 ---
 
-## Instalaci&oacute;n
+## Instalación
 
 ```bash
 git clone https://github.com/JuanVictorFY/Frontend-Clinica-DentalPro.git
@@ -124,36 +109,37 @@ npm install
 
 ## Comandos
 
-| Comando | Descripci&oacute;n |
+| Comando | Descripción |
 |---------|-------------|
 | `npm start` | Servidor de desarrollo en `http://localhost:4200` |
-| `npm run build` | Build de producci&oacute;n en `dist/` |
-| `npm test` | Ejecutar tests unitarios con Vitest |
-| `npx vitest run src/app/core/` | Tests solo del core (guards + auth) |
+| `npm run build` | Build de producción en `dist/` |
 
 ---
 
 ## Estructura de Roles y Permisos
 
 ```
-ADMIN
+ADMINISTRADOR
 ├── Dashboard
-├── Pacientes (CRUD + Historial)
-├── Citas (CRUD + Filtros)
-├── Atenci&oacute;n (Notas cl&iacute;nicas)
-├── Usuarios (CRUD)
-└── Reportes (Ver + PDF)
+├── Pacientes      (CRUD + Historial clínico)
+├── Citas          (CRUD + Filtros + Estados)
+├── Atención       (Notas clínicas)
+├── Usuarios       (CRUD)
+├── Reportes       (Ver + PDF)
+├── Tratamientos   (CRUD catálogo)
+└── Pagos          (Ver + Cambiar estado)
 
 RECEPCIONISTA
 ├── Dashboard
-├── Pacientes (CRUD + Historial)
-└── Citas (CRUD + Filtros)
+├── Pacientes      (CRUD + Historial clínico)
+├── Citas          (CRUD + Filtros)
+└── Pagos          (Ver + Marcar pagado)
 
 ODONTOLOGO
 ├── Dashboard
-├── Citas (Ver + Atender)
-├── Atenci&oacute;n (Notas cl&iacute;nicas)
-└── Reportes (Ver + PDF)
+├── Citas          (Ver + Atender)
+├── Atención       (Notas clínicas)
+└── Reportes       (Ver + PDF)
 ```
 
 ---
@@ -162,15 +148,22 @@ ODONTOLOGO
 
 - **Componentes**: Standalone, sin NgModules
 - **Estado**: Signals (`signal()`, `computed()`)
-- **DI**: `inject()` en vez de constructor injection
+- **DI**: `inject()` en lugar de constructor injection
 - **Control flow**: `@if`, `@for`, `@switch`
-- **Inputs**: `input()` function con `withComponentInputBinding()`
-- **Tema**: Dark por defecto, toggle claro/oscuro
-- **Idioma**: Todo el UI en espa&ntilde;ol
-- **Commits**: Conventional Commits en espa&ntilde;ol
+- **Tema**: Dark por defecto, toggle claro/oscuro persistente
+- **Idioma**: UI completamente en español
 
 ---
 
-## Licencia
+## Autoría
 
-Proyecto acad&eacute;mico &mdash; Uso educativo.
+Proyecto diseñado, desarrollado e implementado por:
+
+- **Desarrolladora:** Sheila JPM
+- **LinkedIn:** [Sheila Jacqueline Principe Merino](https://www.linkedin.com/in/sheila-jacqueline-principe-merino-1579802aa/)
+- **GitHub:** [@SHEILAJPM](https://github.com/SHEILAJPM)
+- **Contacto:** [principemerinosheila@gmail.com](mailto:principemerinosheila@gmail.com)
+
+---
+
+*Proyecto académico — Ingeniería de Sistemas e Informática.*
