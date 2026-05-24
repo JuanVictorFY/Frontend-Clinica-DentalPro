@@ -73,3 +73,4 @@ import { ToastService, ToastType } from '../../services/toast.service';
 export class ToastContainerComponent {
   readonly toastService = inject(ToastService);
 }
+
