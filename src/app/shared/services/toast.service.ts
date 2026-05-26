@@ -46,3 +46,4 @@ export class ToastService {
     setTimeout(() => this.dismiss(id), 4000);
   }
 }
+

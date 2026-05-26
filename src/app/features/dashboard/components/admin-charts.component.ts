@@ -315,3 +315,4 @@ export class AdminChartsComponent implements OnInit, OnDestroy {
     this.charts.push(c);
   }
 }
+
