@@ -56,3 +56,4 @@ export class TableSkeletonComponent {
     return widths[(colIndex + rowIndex) % widths.length];
   }
 }
+
