@@ -56,3 +56,4 @@ export class SearchInputComponent implements OnInit {
       });
   }
 }
+
