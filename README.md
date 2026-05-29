@@ -19,7 +19,7 @@
 
 ## Backend
 
-https://github.com/SHEILAJPM/Backend-Clinica-DentalPro.git
+https://github.com/JuanVictorFY/Backend-Clinica-DentalPro.git
 
 > El frontend consume la API REST del backend (Spring Boot 3.4.5 + PostgreSQL). Debe estar corriendo en `http://localhost:8080` antes de iniciar el frontend.
 
