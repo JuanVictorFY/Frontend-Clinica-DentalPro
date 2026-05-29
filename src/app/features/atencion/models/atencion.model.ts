@@ -17,3 +17,4 @@ export interface NotaClinicaRequest {
   observaciones: string;
 }
 
+
