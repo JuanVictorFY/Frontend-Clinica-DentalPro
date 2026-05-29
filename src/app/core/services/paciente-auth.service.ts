@@ -1,8 +1,9 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
-const API = 'http://localhost:8080/api/auth';
+const API = `${environment.apiUrl}/auth`;
 
 export interface RegistroPacienteRequest {
   nombreCompleto: string;

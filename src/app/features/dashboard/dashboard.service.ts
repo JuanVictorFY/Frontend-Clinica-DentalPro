@@ -1,8 +1,9 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../../environments/environment';
 import { Observable, forkJoin, map } from 'rxjs';
 
-const API = 'http://localhost:8080/api';
+const API = environment.apiUrl;
 
 export interface CitaDashboard {
   id: number;

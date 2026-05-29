@@ -1,6 +1,7 @@
 import { Injectable, inject, signal, computed } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
+import { environment } from '../../../environments/environment';
 import { Observable } from 'rxjs';
 import { tap, map } from 'rxjs/operators';
 import { UserRole, UserProfile } from '../models/user.model';
@@ -17,7 +18,7 @@ interface LoginApiResponse {
 
 const TOKEN_KEY = 'dental_pro_token';
 const USER_KEY  = 'dental_pro_user';
-const API = 'http://localhost:8080/api/auth';
+const API = `${environment.apiUrl}/auth`;
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {

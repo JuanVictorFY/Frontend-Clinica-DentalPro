@@ -1,9 +1,10 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../../environments/environment';
 import { Observable } from 'rxjs';
 import { Usuario, UsuarioRequest } from '../models/usuario.model';
 
-const API = 'http://localhost:8080/api/usuarios';
+const API = `${environment.apiUrl}/usuarios`;
 
 @Injectable({ providedIn: 'root' })
 export class UsuarioService {

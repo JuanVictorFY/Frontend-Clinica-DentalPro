@@ -1,9 +1,10 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../../environments/environment';
 import { Observable, map } from 'rxjs';
 import { Paciente, PacienteRequest } from '../models/paciente.model';
 
-const API = 'http://localhost:8080/api';
+const API = environment.apiUrl;
 
 interface PacientePage {
   content: Paciente[];
