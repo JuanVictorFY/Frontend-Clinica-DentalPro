@@ -42,3 +42,4 @@ export function isTransicionValida(from: EstadoCita, to: EstadoCita): boolean {
 }
 
 
+
