@@ -8,3 +8,4 @@ export interface HistorialClinico {
   fechaActualizacion: string | null;
 }
 
+
