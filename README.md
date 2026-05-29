@@ -155,4 +155,36 @@ ODONTOLOGO
 
 ---
 
+## Ramas
+
+| Rama | Descripción |
+|------|-------------|
+| `feature/setup-angular` | Configuración base de Angular, rutas y TailwindCSS |
+| `feature/paginas-publicas` | Home, Servicios, Nosotros y Contacto |
+| `feature/componentes-globales` | Navbar y Footer responsivos |
+| `feature/auth-login` | Login, registro de pacientes y recuperación de contraseña |
+| `feature/guards-interceptors` | Guards de auth/rol e interceptor JWT |
+| `feature/modulo-pacientes` | CRUD de pacientes e historial clínico |
+| `feature/modulo-citas` | Agenda de citas con filtros avanzados |
+| `feature/modulo-atencion` | Registro de notas y atención clínica |
+| `feature/modulo-usuarios` | Gestión de usuarios del personal |
+| `feature/modulo-pagos` | Registro de cobros y cambio de estado |
+| `feature/modulo-reportes` | Reportes paginados con exportación a PDF |
+| `feature/modulo-tratamientos` | Catálogo de tratamientos y precios |
+| `feature/dashboard-shared` | Dashboard, layout de intranet y componentes compartidos |
+
+---
+
+## Autoría
+
+Proyecto diseñado, desarrollado e implementado por:
+
+- **Desarrollador:** Juan Victor Figueroa Yupton
+- **GitHub:** [@JuanVictorFY](https://github.com/JuanVictorFY)
+- **Contacto:** [figyuptonj99@gmail.com](mailto:figyuptonj99@gmail.com)
+
+---
+
+*Proyecto desarrollado con fines académicos — Ingeniería de Sistemas e Informática.*
+
 
