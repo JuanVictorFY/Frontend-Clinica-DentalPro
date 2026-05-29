@@ -410,3 +410,4 @@ export class PacienteDetalleComponent implements OnInit {
 }
 
 
+
