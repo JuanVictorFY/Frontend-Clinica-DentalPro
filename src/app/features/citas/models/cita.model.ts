@@ -41,3 +41,5 @@ export function isTransicionValida(from: EstadoCita, to: EstadoCita): boolean {
   return transiciones[from].includes(to);
 }
 
+
+
