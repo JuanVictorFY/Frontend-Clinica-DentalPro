@@ -15,3 +15,6 @@ export type MetodoPago = 'EFECTIVO' | 'TARJETA' | 'TRANSFERENCIA';
 export type EstadoPago = 'PENDIENTE' | 'PAGADO' | 'ANULADO';
 
 
+
+
+
