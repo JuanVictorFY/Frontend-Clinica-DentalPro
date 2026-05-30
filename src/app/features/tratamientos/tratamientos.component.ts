@@ -232,3 +232,9 @@ export class TratamientosComponent implements OnInit {
 }
 
 
+
+
+
+
+
+
